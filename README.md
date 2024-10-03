@@ -23,8 +23,13 @@ Ludis é um aplicativo que permite todos os atletas terem oportunidades.
 
 ## Pastas
 
-Pasta ProjetoGrupo5.zip é referente ao código em backend responsável pela função principal da tela principal(CRUD).
-Pasta backend login.zip é referente ao código em backend responsável pelo cadastro e login.
+Projeto-02--PDM-main.zip: Contém o código do frontend (Android Studio), que também é responsável por conectar a API Node.js com o Android Studio.
+backend-ludis.zip: Contém o código do backend, responsável pelo cadastro, login e publicações.
+
+Frontend = Projeto-02--PDM-main.zip.
+(Pasta Frontend não esta zipada)
+Backend# = backend-ludis.zip.
+(Pasta Backend# não esta zipada)
 
 ## 🛠 Instalação
 
