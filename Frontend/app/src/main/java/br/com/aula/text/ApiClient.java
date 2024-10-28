@@ -13,7 +13,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://localhost:8080/api";
+    private static final String BASE_URL = "http://https://ludis.onrender.com/api";
     private static final OkHttpClient client = new OkHttpClient();
 
     public static void cadastrar(String nome, String email, String senha, Callback callback,String imagem, String Titulo) {
