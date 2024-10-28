@@ -40,7 +40,7 @@ public class postagem extends AppCompatActivity {
     private Button buttonSelecionarImagem;
     private ImageView imageViewImagem;
 
-    private static final String URL = "http://10.0.2.2:8080/api/publicacao";
+    private static final String URL = "http://https://ludis.onrender.com/api/publicacao";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

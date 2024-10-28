@@ -6,7 +6,7 @@
     android:background="#8C9DCA"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Login">
+    tools:context=".LoginAtleta">
 
     <ImageView
         android:id="@+id/btnVoltar"
