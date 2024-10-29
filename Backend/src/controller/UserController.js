@@ -1,6 +1,5 @@
 // src/controller/UserController.js
 const User = require("../models/User");
-const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 const UserController = {
@@ -18,34 +17,22 @@ const UserController = {
             // Decodifica a senha armazenada de Base64
             const storedPassword = Buffer.from(user.senha, 'base64');
             
-            // Extrai o salt (primeiros 16 bytes) e o hash
+            // Extrai o salt e o hash
             const salt = storedPassword.slice(0, 16);
             const storedHash = storedPassword.slice(16);
 
-            // Gera o hash da senha fornecida usando o mesmo salt
+            // Gera o hash da senha fornecida
             const hash = crypto.pbkdf2Sync(senha, salt, 1000, 64, 'sha256');
 
-            // Compara os hashes de forma segura
+            // Compara os hashes
             if (!crypto.timingSafeEqual(storedHash, hash.slice(0, storedHash.length))) {
                 return res.status(401).json({ 
                     msg: "Email ou senha incorretos" 
                 });
             }
 
-            // Gera o token JWT
-            const token = jwt.sign(
-                { 
-                    id: user.id,
-                    email: user.email,
-                    nome: user.nome 
-                }, 
-                process.env.JWT_SECRET,
-                { expiresIn: '24h' }
-            );
-
             return res.status(200).json({
                 msg: "Login realizado com sucesso",
-                token,
                 user: {
                     id: user.id,
                     nome: user.nome,
@@ -72,11 +59,22 @@ const UserController = {
                 });
             }
 
-            // A senha já vem criptografada do cliente
+            // Gera um salt aleatório
+            const salt = crypto.randomBytes(16);
+
+            // Gera o hash da senha
+            const hash = crypto.pbkdf2Sync(senha, salt, 1000, 64, 'sha256');
+
+            // Combina salt e hash
+            const senhaComSalt = Buffer.concat([salt, hash]);
+
+            // Converte para Base64
+            const senhaCriptografada = senhaComSalt.toString('base64');
+
             const user = await User.create({
                 nome,
                 email,
-                senha // Já está em formato Base64 com salt
+                senha: senhaCriptografada
             });
 
             return res.status(201).json({
@@ -113,7 +111,6 @@ const UserController = {
                 });
             }
 
-            // Não permite atualização de senha por esta rota
             await user.update({ nome, email });
 
             return res.status(200).json({
@@ -132,7 +129,6 @@ const UserController = {
         }
     },
 
-    // Rota específica para alteração de senha
     updatePassword: async (req, res) => {
         try {
             const { id } = req.params;
@@ -157,8 +153,19 @@ const UserController = {
                 });
             }
 
-            // A nova senha já deve vir criptografada do cliente
-            await user.update({ senha: novaSenha });
+            // Gera um novo salt aleatório
+            const newSalt = crypto.randomBytes(16);
+
+            // Gera o hash da nova senha
+            const newHash = crypto.pbkdf2Sync(novaSenha, newSalt, 1000, 64, 'sha256');
+
+            // Combina novo salt e hash
+            const novaSenhaComSalt = Buffer.concat([newSalt, newHash]);
+
+            // Converte para Base64
+            const novaSenhaCriptografada = novaSenhaComSalt.toString('base64');
+
+            await user.update({ senha: novaSenhaCriptografada });
 
             return res.status(200).json({
                 msg: "Senha atualizada com sucesso"
