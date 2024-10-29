@@ -1,155 +1,199 @@
+// src/controller/UserController.js
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const UserController = {
-  /**
-   * Função para login de usuário
-   * @param {Object} req - Requisição do cliente
-   * @param {Object} res - Resposta do servidor
-   */
-  login: async (req, res) => {
-    try {
-      const { email, senha } = req.body;
+    login: async (req, res) => {
+        try {
+            const { email, senha } = req.body;
 
-      console.log("Email:", email);
-      console.log("Senha:", senha);
+            const user = await User.findOne({ where: { email } });
+            if (!user) {
+                return res.status(401).json({ 
+                    msg: "Email ou senha incorretos" 
+                });
+            }
 
-      // Buscar usuário
-      const user = await User.findOne({ where: { email } });
+            // Decodifica a senha armazenada de Base64
+            const storedPassword = Buffer.from(user.senha, 'base64');
+            
+            // Extrai o salt (primeiros 16 bytes) e o hash
+            const salt = storedPassword.slice(0, 16);
+            const storedHash = storedPassword.slice(16);
 
-      console.log("Usuário encontrado:", user);
+            // Gera o hash da senha fornecida usando o mesmo salt
+            const hash = crypto.pbkdf2Sync(senha, salt, 1000, 64, 'sha256');
 
-      if (!user) {
-        console.log("Usuário não encontrado");
-        return res.status(401).json({ msg: "Usuário não encontrado. Por favor, verifique seu email e senha." });
-      }
+            // Compara os hashes de forma segura
+            if (!crypto.timingSafeEqual(storedHash, hash.slice(0, storedHash.length))) {
+                return res.status(401).json({ 
+                    msg: "Email ou senha incorretos" 
+                });
+            }
 
-      // Comparar senha
-      if (user.senha !== senha) {
-        console.log("Senha incorreta");
-        return res.status(401).json({ msg: "Senha incorreta. Por favor, verifique sua senha." });
-      }
+            // Gera o token JWT
+            const token = jwt.sign(
+                { 
+                    id: user.id,
+                    email: user.email,
+                    nome: user.nome 
+                }, 
+                process.env.JWT_SECRET,
+                { expiresIn: '24h' }
+            );
 
-      // Gerar token
-      const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
+            return res.status(200).json({
+                msg: "Login realizado com sucesso",
+                token,
+                user: {
+                    id: user.id,
+                    nome: user.nome,
+                    email: user.email
+                }
+            });
+        } catch (error) {
+            console.error('Erro no login:', error);
+            return res.status(500).json({ 
+                msg: "Erro interno do servidor" 
+            });
+        }
+    },
 
-      console.log("Token gerado:", token);
+    create: async (req, res) => {
+        try {
+            const { nome, email, senha } = req.body;
 
-      return res.status(200).json({ msg: "Login realizado", token });
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      return res.status(500).json({ msg: "Erro ao fazer login. Por favor, tente novamente." });
+            // Verifica se o email já existe
+            const existingUser = await User.findOne({ where: { email } });
+            if (existingUser) {
+                return res.status(400).json({ 
+                    msg: "Email já cadastrado" 
+                });
+            }
+
+            // A senha já vem criptografada do cliente
+            const user = await User.create({
+                nome,
+                email,
+                senha // Já está em formato Base64 com salt
+            });
+
+            return res.status(201).json({
+                msg: "Usuário criado com sucesso",
+                user: {
+                    id: user.id,
+                    nome: user.nome,
+                    email: user.email
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao criar usuário:', error);
+            if (error.name === 'SequelizeValidationError') {
+                return res.status(400).json({ 
+                    msg: "Dados inválidos", 
+                    errors: error.errors.map(e => e.message) 
+                });
+            }
+            return res.status(500).json({ 
+                msg: "Erro interno do servidor" 
+            });
+        }
+    },
+
+    update: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { nome, email } = req.body;
+
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({ 
+                    msg: "Usuário não encontrado" 
+                });
+            }
+
+            // Não permite atualização de senha por esta rota
+            await user.update({ nome, email });
+
+            return res.status(200).json({
+                msg: "Usuário atualizado com sucesso",
+                user: {
+                    id: user.id,
+                    nome: user.nome,
+                    email: user.email
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
+            return res.status(500).json({ 
+                msg: "Erro interno do servidor" 
+            });
+        }
+    },
+
+    // Rota específica para alteração de senha
+    updatePassword: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { senhaAtual, novaSenha } = req.body;
+
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({ 
+                    msg: "Usuário não encontrado" 
+                });
+            }
+
+            // Verificação da senha atual
+            const storedPassword = Buffer.from(user.senha, 'base64');
+            const salt = storedPassword.slice(0, 16);
+            const storedHash = storedPassword.slice(16);
+            const hash = crypto.pbkdf2Sync(senhaAtual, salt, 1000, 64, 'sha256');
+
+            if (!crypto.timingSafeEqual(storedHash, hash.slice(0, storedHash.length))) {
+                return res.status(401).json({ 
+                    msg: "Senha atual incorreta" 
+                });
+            }
+
+            // A nova senha já deve vir criptografada do cliente
+            await user.update({ senha: novaSenha });
+
+            return res.status(200).json({
+                msg: "Senha atualizada com sucesso"
+            });
+        } catch (error) {
+            console.error('Erro ao atualizar senha:', error);
+            return res.status(500).json({ 
+                msg: "Erro interno do servidor" 
+            });
+        }
+    },
+
+    delete: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({ 
+                    msg: "Usuário não encontrado" 
+                });
+            }
+
+            await user.destroy();
+
+            return res.status(200).json({
+                msg: "Usuário deletado com sucesso"
+            });
+        } catch (error) {
+            console.error('Erro ao deletar usuário:', error);
+            return res.status(500).json({ 
+                msg: "Erro interno do servidor" 
+            });
+        }
     }
-  },
-
-  create: async (req, res) => {
-    try {
-      const { nome, senha, email } = req.body;
-
-      console.log("Nome:", nome);
-      console.log("Senha:", senha);
-      console.log("Email:", email);
-
-      const userCriado = await User.create({ nome, senha, email });
-
-      console.log("Usuário criado:", userCriado);
-
-      return res.status(200).json({
-        msg: "Usuario criado com sucesso!",
-        user: userCriado,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
-  },
-  update: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { nome, senha, email } = req.body;
-
-      console.log({ id });
-      console.log({ nome, senha, email });
-
-      const userUpdate = await User.findByPk(id);
-
-      if (userUpdate == null) {
-        return res.status(404).json({
-          msg: "usuario nao encontrado",
-        });
-      }
-
-      const updated = await userUpdate.update({
-        nome,
-        senha,
-        email,
-      });
-      if (updated) {
-        return res.status(200).json({
-          msg: "Usuario atualizado com sucesso!",
-        });
-      }
-      return res.status(500).json({
-        msg: "Erro ao atualizar usuario",
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
-  },
-  getAll: async (req, res) => {
-    try {
-      const usuarios = await User.findAll();
-      return res.status(200).json({
-        msg: "Usuarios Encontrados!",
-        usuarios,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
-  },
-  getOne: async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const usuarioEncontrado = await User.findByPk(id);
-
-      if (usuarioEncontrado == null) {
-        return res.status(404).json({
-          msg: "Usuario nao encontrado!",
-        });
-      }
-      return res.status(200).json({
-        msg: "Usuario Encontrados",
-        usuario: usuarioEncontrado,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
-  },
-  delete: async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const userFinded = await User.findByPk(id);
-
-      if (userFinded == null) {
-        return res.status(404).json({
-          msg: "user nao encontrado",
-        });
-      }
-      await userFinded.destroy();
-
-      return res.status(200).json({
-        msg: "Usuario deletado com sucesso",
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
-  },
 };
 
 module.exports = UserController;

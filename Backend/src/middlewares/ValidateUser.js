@@ -1,40 +1,42 @@
-//Nome , email e senha
-
+// src/middlewares/ValidateUser.js
 const validateUser = (req, res, next) => {
-    const { nome, email, senha } = req.body;
-    console.log('Valor do campo "nome":', nome);
+  const { nome, email, senha } = req.body;
 
-    if (!nome) {
+  // Validação do nome
+  if (!nome || nome.trim().length < 2) {
       return res.status(400).json({
-        msg: "O campo 'nome' é obrigatório",
+          msg: "Nome inválido. Deve ter pelo menos 2 caracteres"
       });
-    }
-  
-    if (!email) {
+  }
+
+  // Validação do email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
       return res.status(400).json({
-        msg: "O campo 'email' é obrigatório",
+          msg: "Email inválido"
       });
-    }
-  
-    if (!senha) {
+  }
+
+  // Validação da senha (apenas verifica se existe, pois já deve vir criptografada)
+  if (!senha) {
       return res.status(400).json({
-        msg: "O campo 'senha' é obrigatório",
+          msg: "Senha é obrigatória"
       });
-    }
-  
-    return next();
-  };
+  }
 
-const validateUserId = (req,res,next) => {
-    const {id} = req.params;
-
-    if(!id) {
-        return res.status(400).json({
-            msg:"Parametro faltando",
-        });
-    }
-
-    return next();
+  return next();
 };
 
-module.exports = {validateUser,validateUserId};
+const validateUserId = (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+      return res.status(400).json({
+          msg: "ID inválido"
+      });
+  }
+
+  return next();
+};
+
+module.exports = { validateUser, validateUserId };

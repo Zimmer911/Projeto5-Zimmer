@@ -59,7 +59,7 @@ public class CustomTrustManager {
     private static X509Certificate loadCertificate() throws CertificateException {
         try {
             // Carregue o certificado do servidor de um arquivo
-            InputStream inputStream = LoginAtleta.class.getResourceAsStream("/server_cert.crt");
+            InputStream inputStream = CadastroAtleta.class.getResourceAsStream("/server_cert.crt");
             return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(inputStream);
         } catch (CertificateException e) {
             // Trate a exceção aqui

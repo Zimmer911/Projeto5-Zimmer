@@ -6,7 +6,7 @@
     android:background="#8C9DCA"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginAtleta">
+    tools:context=".CadastroAtleta">
 
     <ImageView
         android:id="@+id/btnVoltar"
@@ -128,7 +128,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/buttonLogin"
+        android:id="@+id/buttonCadastrar"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/black"

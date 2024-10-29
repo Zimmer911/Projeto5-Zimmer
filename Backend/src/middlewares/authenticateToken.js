@@ -1,24 +1,30 @@
-const jwt = require("jsonwebtoken");
+// src/middlewares/authenticateToken.js
+const jwt = require('jsonwebtoken');
 
-function authenticateToken(req, res, next) {
-  const token = req.headers["authorization"]?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({
-      msg: "Você precisa se autenticar para acessar essa página",
-    });
-  }
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-  jwt.verify(token, process.env.SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({
-        msg: "Sua sessão expirou, por favor faça login novamente"
-      });
+    if (!token) {
+        return res.status(401).json({ 
+            msg: "Token de autenticação não fornecido" 
+        });
     }
 
-    //Armazenar usuario na requisição
-    req.user = user;
-    next();
-  });
-}
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ 
+                msg: "Token expirado" 
+            });
+        }
+        return res.status(403).json({ 
+            msg: "Token inválido" 
+        });
+    }
+};
 
 module.exports = authenticateToken;
