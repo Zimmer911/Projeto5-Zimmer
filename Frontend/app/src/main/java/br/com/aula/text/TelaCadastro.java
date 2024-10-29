@@ -10,31 +10,36 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Principal extends AppCompatActivity {
+public class TelaCadastro extends AppCompatActivity {
 
-    private Button btnCadastro;
-    private Button btnLogin;
+    private Button btnCadastroAtleta;
+    private Button btnCadastroClube;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_principal);
+        setContentView(R.layout.activity_tela_cadastro);
 
-        btnCadastro = findViewById(R.id.btnCadastro);
+        btnCadastroAtleta = findViewById(R.id.btnCadastroAtleta);
 
-        btnCadastro.setOnClickListener(view -> {
-            Intent intent = new Intent(Principal.this, TelaCadastro.class);
+        btnCadastroAtleta.setOnClickListener(view -> {
+            Intent intent = new Intent(TelaCadastro.this, CadastroAtleta.class);
             startActivity(intent);
         });
 
-        btnLogin = findViewById(R.id.btnLogin);
+        btnCadastroClube = findViewById(R.id.btnCadastroClube);
 
-        btnLogin.setOnClickListener(view -> {
-            Intent intent = new Intent(Principal.this, TelaLogin.class);
+        btnCadastroClube.setOnClickListener(view -> {
+            Intent intent = new Intent(TelaCadastro.this, CadastroAtleta.class);
             startActivity(intent);
         });
+
+
+
+
 
 
 

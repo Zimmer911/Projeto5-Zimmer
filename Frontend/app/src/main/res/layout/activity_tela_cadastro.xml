@@ -5,17 +5,17 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E8E1FF"
-    tools:context=".Principal">
+    android:background="#5f9ea0"
+    tools:context=".TelaCadastro">
 
     <Button
-        android:id="@+id/btnCadastro"
+        android:id="@+id/btnCadastroAtleta"
         android:layout_width="301dp"
         android:layout_height="65dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
         android:backgroundTint="@color/roxobotão"
-        android:text="Cadastro"
+        android:text="Atleta"
         android:textSize="23dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,13 +24,13 @@
         app:layout_constraintVertical_bias="0.70" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnCadastroClube"
         android:layout_width="301dp"
         android:layout_height="65dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
         android:backgroundTint="@color/roxobotão"
-        android:text="Login"
+        android:text="Clube"
         android:textSize="23dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -56,7 +56,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="28dp"
-        android:text="Primeira vez em nosso APP?"
+        android:text="Atleta ou clube?"
         android:textColor="@color/black"
         android:textSize="20dp"
         android:textStyle="bold"
@@ -79,3 +79,4 @@
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
