@@ -24,12 +24,4 @@ router.delete('/:id', validatePublicationId, (req, res) => {
   PublicacaoController.delete(req, res)
 });
 
-router.get('/images', (req, res) => {
-  PublicacaoController.listImages(req, res)
-});
-
-router.get('/images/:imageName', (req, res) => {
-  PublicacaoController.getImage(req, res)
-});
-
 module.exports = router;

@@ -9,29 +9,19 @@ const upload = multer({ dest: 'uploads/' });
 const PublicacaoController = {
   create: async (req, res) => {
     try {
-      const { nome, descricao, nota } = req.body;
-      const image = req.file;
+        const { nome, descricao, nota } = req.body;
 
-      if (!image) {
-        return res.status(400).json({ msg: "Imagem é obrigatória" });
-      }
+        const publicacaoCriada = await Publicacao.create({ nome, descricao, nota });
 
-      const imageName = image.originalname;
-      const imageData = image.buffer;
-
-      await sharp(imageData).toFile(`uploads/${imageName}`);
-
-      const publicacaoCriada = await Publicacao.create({ nome, descricao, nota, imagem: imageName });
-
-      return res.status(200).json({
-        msg: "Publicação criada com sucesso!",
-        user: publicacaoCriada,
-      });
+        return res.status(200).json({
+            msg: "Publicação criada com sucesso!",
+            publicacao: publicacaoCriada,
+        });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+        console.error(error);
+        return res.status(500).json({ msg: "Erro ao criar publicação" });
     }
-  },
+},
 
   update: async (req, res) => {
     try {
