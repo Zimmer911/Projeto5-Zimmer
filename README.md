@@ -123,9 +123,9 @@ npm install
 -Raiz<br>
 |<br>
 |-->documentos<br>
-  &emsp;|-->Entregas dos diagramas por etapa
-  &emsp;|-->Projeto de extensão
-  &emsp;|-->
+  &emsp;|-->Entregas dos diagramas por etapa<br>
+  &emsp;|-->Projeto de extensão<br>
+  &emsp;|--><br>
 |-->src<br>
   &emsp;|-->Backend<br>
   &emsp;|-->Frontend<br>
