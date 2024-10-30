@@ -123,12 +123,9 @@ npm install
 -Raiz<br>
 |<br>
 |-->documentos<br>
-  &emsp;|-->atividades<br>
-  &emsp;|-->backend/out<br>
-  &emsp;|-->frontend/javadocs<br>
-  &emsp;|-->Projetos_de_Extensão-grupo12.pdf<br>
-  &emsp;|-->Projetos_de_Extensão-grupo12.docx<br>
-|-->imagens<br>
+  &emsp;|-->Entregas dos diagramas por etapa
+  &emsp;|-->Projeto de extensão
+  &emsp;|-->
 |-->src<br>
   &emsp;|-->Backend<br>
   &emsp;|-->Frontend<br>
