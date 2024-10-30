@@ -41,7 +41,7 @@
   2.Instale as dependências
       
      
-      No terminal do VScode: 
+   No terminal do VScode: 
    <code>  NPM I;</code>
    <code>  NPM RUN DEV;</code>
 
