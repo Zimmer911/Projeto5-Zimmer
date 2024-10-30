@@ -66,7 +66,7 @@ public class ComentariosActivity extends AppCompatActivity {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("nome", "Usuario"); // Substitua pelo nome do usuário logado
-            jsonObject.put("descricao", cifraCesar(comentario, 3)); // Criptografar o comentário
+            jsonObject.put("descricao", comentario);
             jsonObject.put("nota", 5); // Opcional
         } catch (JSONException e) {
             e.printStackTrace();
@@ -139,6 +139,7 @@ public class ComentariosActivity extends AppCompatActivity {
                                     comentarioJson.getString("descricao")
                             ));
                         }
+
                         runOnUiThread(() -> {
                             comentarios.clear();
                             comentarios.addAll(novosComentarios);
@@ -150,20 +151,5 @@ public class ComentariosActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    // Método para aplicar a cifra de César
-    private String cifraCesar(String texto, int deslocamento) {
-        StringBuilder resultado = new StringBuilder();
-        for (char caractere : texto.toCharArray()) {
-            if (Character.isLetter(caractere)) {
-                char base = Character.isUpperCase(caractere) ? 'A' : 'a';
-                int novoCaractere = (caractere - base + deslocamento) % 26 + base;
-                resultado.append((char) novoCaractere);
-            } else {
-                resultado.append(caractere);
-            }
-        }
-        return resultado.toString();
     }
 }
