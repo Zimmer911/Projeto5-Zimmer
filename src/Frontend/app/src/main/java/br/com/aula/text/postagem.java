@@ -29,6 +29,7 @@ public class postagem extends AppCompatActivity {
     private EditText descricaoEditText;
     private EditText notaEditText;
     private Button postarButton;
+    private static final int SHIFT = 3; // Deslocamento para a cifra de César
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,6 @@ public class postagem extends AppCompatActivity {
         descricaoEditText = ((TextInputLayout) findViewById(R.id.inputDescricao)).getEditText();
         notaEditText = ((TextInputLayout) findViewById(R.id.inputNota)).getEditText();
         postarButton = findViewById(R.id.buttonpublicar);
-
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -67,7 +67,17 @@ public class postagem extends AppCompatActivity {
             return;
         }
 
-        criarPostagem(nome, descricao, nota);
+        // Criptografar os dados antes de enviar
+        String nomeCriptografado = cifraCesar(nome, SHIFT);
+        String descricaoCriptografada = cifraCesar(descricao, SHIFT);
+
+        // Log para verificar a criptografia
+        System.out.println("Nome original: " + nome);
+        System.out.println("Nome criptografado: " + nomeCriptografado);
+        System.out.println("Descrição original: " + descricao);
+        System.out.println("Descrição criptografada: " + descricaoCriptografada);
+
+        criarPostagem(nomeCriptografado, descricaoCriptografada, nota);
     }
 
     private boolean validateFields(String nome, String descricao, String nota) {
@@ -104,6 +114,12 @@ public class postagem extends AppCompatActivity {
                 .url("https://ludis.onrender.com/api/publicacao")
                 .post(requestBody)
                 .build();
+
+        // Log para verificar os dados enviados
+        System.out.println("Enviando para o servidor:");
+        System.out.println("Nome: " + nome);
+        System.out.println("Descrição: " + descricao);
+        System.out.println("Nota: " + nota);
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
@@ -146,11 +162,23 @@ public class postagem extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
         });
     }
+
+    // Método para criptografar usando a cifra de César
+    private String cifraCesar(String texto, int deslocamento) {
+        StringBuilder resultado = new StringBuilder();
+        for (char caractere : texto.toCharArray()) {
+            if (Character.isLetter(caractere)) {
+                int base = Character.isUpperCase(caractere) ? 'A' : 'a';
+                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
+            } else {
+                resultado.append(caractere);
+            }
+        }
+        return resultado.toString();
+    }
+
+    // Método para descriptografar (pode ser útil para testes)
+    private String decifrarCesar(String textoCifrado, int deslocamento) {
+        return cifraCesar(textoCifrado, 26 - deslocamento); // 26 - deslocamento é o deslocamento inverso
+    }
 }
-
-
-
-
-
-
-

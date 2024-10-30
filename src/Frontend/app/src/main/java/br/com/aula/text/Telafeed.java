@@ -32,6 +32,7 @@ public class Telafeed extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FeedAdapter feedAdapter;
     private List<Post> postList;
+    private static final int SHIFT = 3; // Adicione esta linha aqui
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,9 @@ public class Telafeed extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao carregar posts: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                        "Erro ao carregar posts: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -97,26 +100,62 @@ public class Telafeed extends AppCompatActivity {
                             postList.clear();
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                                String nome = jsonObject.getString("nome");
-                                String descricao = jsonObject.getString("descricao");
+
+                                // Obter dados criptografados
+                                String nomeCriptografado = jsonObject.getString("nome");
+                                String descricaoCriptografada = jsonObject.getString("descricao");
                                 String nota = jsonObject.getString("nota");
                                 String imagem = jsonObject.optString("imagem", "");
-                                postList.add(new Post(nome, descricao, nota, imagem));
+
+                                // Descriptografar os dados
+                                String nomeDecifrado = decifrarCesar(nomeCriptografado, SHIFT);
+                                String descricaoDecifrada = decifrarCesar(descricaoCriptografada, SHIFT);
+
+                                // Log para debug
+                                Log.d("Telafeed", "Nome criptografado: " + nomeCriptografado);
+                                Log.d("Telafeed", "Nome decifrado: " + nomeDecifrado);
+                                Log.d("Telafeed", "Descrição criptografada: " + descricaoCriptografada);
+                                Log.d("Telafeed", "Descrição decifrada: " + descricaoDecifrada);
+
+                                postList.add(new Post(nomeDecifrado, descricaoDecifrada, nota, imagem));
                             }
                             runOnUiThread(() -> {
                                 feedAdapter.notifyDataSetChanged();
-                                Toast.makeText(Telafeed.this, "Posts carregados com sucesso", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(Telafeed.this,
+                                        "Posts carregados com sucesso",
+                                        Toast.LENGTH_SHORT).show();
                             });
                         } else {
-                            runOnUiThread(() -> Toast.makeText(Telafeed.this, "Formato de resposta inválido", Toast.LENGTH_SHORT).show());
+                            runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                                    "Formato de resposta inválido",
+                                    Toast.LENGTH_SHORT).show());
                         }
                     } catch (JSONException e) {
                         Log.e("Telafeed", "Erro ao processar JSON: " + e.getMessage());
-                        runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao processar dados: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                                "Erro ao processar dados: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao carregar posts: " + response.message(), Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                            "Erro ao carregar posts: " + response.message(),
+                            Toast.LENGTH_SHORT).show());
                 }
             }
         });
-    }}
+    }
+
+    // Método para descriptografar usando a cifra de César
+    private String decifrarCesar(String textoCifrado, int deslocamento) {
+        StringBuilder resultado = new StringBuilder();
+        for (char caractere : textoCifrado.toCharArray()) {
+            if (Character.isLetter(caractere)) {
+                char base = Character.isUpperCase(caractere) ? 'A' : 'a';
+                resultado.append((char) (((caractere - base - deslocamento + 26) % 26) + base));
+            } else {
+                resultado.append(caractere);
+            }
+        }
+        return resultado.toString();
+    }
+}

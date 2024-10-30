@@ -36,6 +36,7 @@ public class ComentariosActivity extends AppCompatActivity {
     private ComentariosAdapter adapter;
     private List<Comentario> comentarios;
     private int postId;
+    private static final int SHIFT = 3; // Adicionado para criptografia César
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +66,8 @@ public class ComentariosActivity extends AppCompatActivity {
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("nome", "Usuario"); // Substitua pelo nome do usuário logado
-            jsonObject.put("descricao", comentario);
+            jsonObject.put("nome", cifraCesar("user", SHIFT)); // Criptografa o nome
+            jsonObject.put("descricao", cifraCesar(comentario, SHIFT)); // Criptografa o comentário
             jsonObject.put("nota", 5); // Opcional
         } catch (JSONException e) {
             e.printStackTrace();
@@ -135,8 +136,8 @@ public class ComentariosActivity extends AppCompatActivity {
                         for (int i = 0; i < comentariosArray.length(); i++) {
                             JSONObject comentarioJson = comentariosArray.getJSONObject(i);
                             novosComentarios.add(new Comentario(
-                                    comentarioJson.getString("nome"),
-                                    comentarioJson.getString("descricao")
+                                    decifrarCesar(comentarioJson.getString("nome"), SHIFT),
+                                    decifrarCesar(comentarioJson.getString("descricao"), SHIFT)
                             ));
                         }
 
@@ -151,5 +152,24 @@ public class ComentariosActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // Método para criptografar usando a cifra de César
+    private String cifraCesar(String texto, int deslocamento) {
+        StringBuilder resultado = new StringBuilder();
+        for (char caractere : texto.toCharArray()) {
+            if (Character.isLetter(caractere)) {
+                int base = Character.isUpperCase(caractere) ? 'A' : 'a';
+                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
+            } else {
+                resultado.append(caractere);
+            }
+        }
+        return resultado.toString();
+    }
+
+    // Método para descriptografar usando a cifra de César
+    private String decifrarCesar(String textoCifrado, int deslocamento) {
+        return cifraCesar(textoCifrado, 26 - deslocamento);
     }
 }
