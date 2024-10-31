@@ -1,27 +1,33 @@
 const Publicacao = require("../models/Publicacao");
-const multer = require('multer');
-const sharp = require('sharp');
-const path = require('path');
 const fs = require('fs');
-
-const upload = multer({ dest: 'uploads/' });
+const path = require('path');
 
 const PublicacaoController = {
   create: async (req, res) => {
     try {
-        const { nome, descricao, nota } = req.body;
+      const { nome, descricao, nota } = req.body;
+      let imagemPath = null;
 
-        const publicacaoCriada = await Publicacao.create({ nome, descricao, nota });
+      if (req.file) {
+        imagemPath = req.file.filename; // Nome do arquivo salvo
+      }
 
-        return res.status(200).json({
-            msg: "Publicação criada com sucesso!",
-            publicacao: publicacaoCriada,
-        });
+      const publicacaoCriada = await Publicacao.create({ 
+        nome, 
+        descricao, 
+        nota,
+        imagem: imagemPath 
+      });
+
+      return res.status(200).json({
+        msg: "Publicação criada com sucesso!",
+        publicacao: publicacaoCriada,
+      });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ msg: "Erro ao criar publicação" });
+      console.error(error);
+      return res.status(500).json({ msg: "Erro ao criar publicação" });
     }
-},
+  },
 
   update: async (req, res) => {
     try {
@@ -30,47 +36,58 @@ const PublicacaoController = {
 
       const publicacaoUpdate = await Publicacao.findByPk(id);
 
-      if (publicacaoUpdate == null) {
+      if (!publicacaoUpdate) {
         return res.status(404).json({
           msg: "Publicação não encontrada",
         });
       }
 
+      let imagemPath = publicacaoUpdate.imagem;
+
       if (req.file) {
-        const image = req.file;
-        const imageName = image.originalname;
-        const imageData = image.buffer;
-
-        await sharp(imageData).toFile(`uploads/${imageName}`);
-
-        publicacaoUpdate.imagem = imageName;
+        // Se há uma nova imagem, deletamos a antiga (se existir)
+        if (publicacaoUpdate.imagem) {
+          const oldImagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoUpdate.imagem);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) console.error("Erro ao deletar imagem antiga:", err);
+          });
+        }
+        imagemPath = req.file.filename;
       }
 
       await publicacaoUpdate.update({
         nome,
         descricao,
         nota,
+        imagem: imagemPath
       });
 
       return res.status(200).json({
         msg: "Publicação atualizada com sucesso!",
+        publicacao: publicacaoUpdate,
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      return res.status(500).json({ msg: "Erro ao atualizar publicação" });
     }
   },
 
   getAll: async (req, res) => {
     try {
       const publicacoes = await Publicacao.findAll();
+      
+      const publicacoesComImagens = publicacoes.map(pub => ({
+        ...pub.toJSON(),
+        imagemUrl: pub.imagem ? `${req.protocol}://${req.get('host')}/uploads/${pub.imagem}` : null
+      }));
+
       return res.status(200).json({
         msg: "Publicações encontradas!",
-        publicacoes,
+        publicacoes: publicacoesComImagens,
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      return res.status(500).json({ msg: "Erro ao buscar publicações" });
     }
   },
 
@@ -80,19 +97,26 @@ const PublicacaoController = {
 
       const publicacaoEncontrada = await Publicacao.findByPk(id);
 
-      if (publicacaoEncontrada == null) {
+      if (!publicacaoEncontrada) {
         return res.status(404).json({
           msg: "Publicação não encontrada!",
         });
       }
 
+      const publicacaoComImagem = {
+        ...publicacaoEncontrada.toJSON(),
+        imagemUrl: publicacaoEncontrada.imagem 
+          ? `${req.protocol}://${req.get('host')}/uploads/${publicacaoEncontrada.imagem}` 
+          : null
+      };
+
       return res.status(200).json({
         msg: "Publicação encontrada",
-        publicacao: publicacaoEncontrada,
+        publicacao: publicacaoComImagem,
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      return res.status(500).json({ msg: "Erro ao buscar publicação" });
     }
   },
 
@@ -102,9 +126,17 @@ const PublicacaoController = {
 
       const publicacaoFinded = await Publicacao.findByPk(id);
 
-      if (publicacaoFinded == null) {
+      if (!publicacaoFinded) {
         return res.status(404).json({
           msg: "Publicação não encontrada",
+        });
+      }
+
+      // Se a publicação tem uma imagem, deletamos o arquivo
+      if (publicacaoFinded.imagem) {
+        const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
+        fs.unlink(imagePath, (err) => {
+          if (err) console.error("Erro ao deletar imagem:", err);
         });
       }
 
@@ -115,33 +147,8 @@ const PublicacaoController = {
       });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
+      return res.status(500).json({ msg: "Erro ao deletar publicação" });
     }
-  },
-
-  listImages: async (req, res) => {
-    fs.readdir('uploads/', (err, files) => {
-      if (err) {
-        return res.status(500).json({
-          msg: "Erro ao listar imagens"
-        });
-      }
-
-      const images = files.filter(
-        (file) =>
-          file.endsWith(".jpg") ||
-          file.endsWith(".png") ||
-          file.endsWith(".jpeg")
-      );
-      res.send(images);
-    });
-  },
-
-  getImage: (req, res) => {
-    const imageName = req.params.imageName;
-
-    const imagePath = path.join(__dirname, '..', '..', 'uploads', imageName);
-    return res.sendFile(imagePath);
   },
 };
 

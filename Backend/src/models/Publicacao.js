@@ -13,6 +13,10 @@ const Publicacao = sequelize.define('publicacao', {
     nota: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    imagem: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 

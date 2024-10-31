@@ -1,10 +1,14 @@
 package br.com.aula.text;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -16,8 +20,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -25,10 +33,14 @@ import okhttp3.Response;
 
 public class postagem extends AppCompatActivity {
 
+    private static final int PICK_IMAGE_REQUEST = 1;
     private EditText nomeEditText;
     private EditText descricaoEditText;
     private EditText notaEditText;
+    private ImageView imageView;
+    private Uri imageUri;
     private Button postarButton;
+    private Button escolherImagemButton;
     private static final int SHIFT = 3; // Deslocamento para a cifra de César
 
     @Override
@@ -45,7 +57,9 @@ public class postagem extends AppCompatActivity {
         nomeEditText = ((TextInputLayout) findViewById(R.id.inputNome)).getEditText();
         descricaoEditText = ((TextInputLayout) findViewById(R.id.inputDescricao)).getEditText();
         notaEditText = ((TextInputLayout) findViewById(R.id.inputNota)).getEditText();
+        imageView = findViewById(R.id.imageView); // Certifique-se de ter um ImageView no layout
         postarButton = findViewById(R.id.buttonpublicar);
+        escolherImagemButton = findViewById(R.id.buttonEscolherImagem); // Botão para escolher imagem
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -56,6 +70,23 @@ public class postagem extends AppCompatActivity {
 
     private void setupListeners() {
         postarButton.setOnClickListener(v -> validateAndPost());
+        escolherImagemButton.setOnClickListener(v -> openImageChooser());
+    }
+
+    private void openImageChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Selecione uma imagem"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();
+            imageView.setImageURI(imageUri); // Exibir a imagem selecionada
+        }
     }
 
     private void validateAndPost() {
@@ -76,7 +107,6 @@ public class postagem extends AppCompatActivity {
         System.out.println("Nome criptografado: " + nomeCriptografado);
         System.out.println("Descrição original: " + descricao);
         System.out.println("Descrição criptografada: " + descricaoCriptografada);
-
         criarPostagem(nomeCriptografado, descricaoCriptografada, nota);
     }
 
@@ -104,11 +134,33 @@ public class postagem extends AppCompatActivity {
         CustomTrustManager customTrustManager = new CustomTrustManager();
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        RequestBody requestBody = new okhttp3.FormBody.Builder()
-                .add("nome", nome)
-                .add("descricao", descricao)
-                .add("nota", nota)
-                .build();
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("nome", nome)
+                .addFormDataPart("descricao", descricao)
+                .addFormDataPart("nota", nota);
+
+        // Adicionar imagem se foi selecionada
+        if (imageUri != null) {
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(imageUri);
+                byte[] bytes = new byte[inputStream.available()];
+                inputStream.read(bytes);
+
+                RequestBody imageBody = RequestBody.create(
+                        MediaType.parse(getContentResolver().getType(imageUri)),
+                        bytes
+                );
+
+                builder.addFormDataPart("image", "imagem.jpg", imageBody);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Erro ao processar imagem", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        RequestBody requestBody = builder.build();
 
         Request request = new Request.Builder()
                 .url("https://ludis.onrender.com/api/publicacao")
@@ -120,6 +172,7 @@ public class postagem extends AppCompatActivity {
         System.out.println("Nome: " + nome);
         System.out.println("Descrição: " + descricao);
         System.out.println("Nota: " + nota);
+        System.out.println("Imagem incluída: " + (imageUri != null));
 
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
@@ -179,6 +232,6 @@ public class postagem extends AppCompatActivity {
 
     // Método para descriptografar (pode ser útil para testes)
     private String decifrarCesar(String textoCifrado, int deslocamento) {
-        return cifraCesar(textoCifrado, 26 - deslocamento); // 26 - deslocamento é o deslocamento inverso
+        return cifraCesar(textoCifrado, 26 - deslocamento);
     }
 }
