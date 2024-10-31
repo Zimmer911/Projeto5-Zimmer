@@ -3,6 +3,7 @@ const express = require("express");
 const router = require("./router/router");
 const sequelize = require("./config/config");
 const path = require('path');
+const fs = require('fs');
 
 const Comentario = require("./models/Comentario");
 const User = require("./models/User");
@@ -11,6 +12,12 @@ const Publicacao = require("./models/Publicacao");
 var cors = require('cors');
 
 const app = express();
+
+// Verificação e criação da pasta uploads
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir);
+}
 
 app.use(cors());
 
@@ -22,7 +29,7 @@ app.use((req, res, next) => {
 });
 
 // Configuração para servir arquivos estáticos da pasta 'uploads'
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // Modelo da API JSON
 app.use(express.json());

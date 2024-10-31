@@ -4,7 +4,7 @@ public class Post {
     private String nome;
     private String descricao;
     private String nota;
-    private String imagem;
+    private String imagem; // Mudando para String para armazenar a URL da imagem
 
     public Post(String nome, String descricao, String nota, String imagem) {
         this.nome = nome;

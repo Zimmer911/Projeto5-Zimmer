@@ -2,10 +2,10 @@ package br.com.aula.text;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +32,8 @@ public class Telafeed extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FeedAdapter feedAdapter;
     private List<Post> postList;
-    private static final int SHIFT = 3; // Adicione esta linha aqui
+    private static final int SHIFT = 3;
+    public static final String CHAVE_SECRETA = "MinhaChaveSecreta123";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,27 +41,17 @@ public class Telafeed extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_telafeed);
 
-        // Inicializar views
         btnpostagem = findViewById(R.id.btnpostagem);
         recyclerView = findViewById(R.id.recyclerViewPosts);
-
-        // Configurar RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // Inicializar lista de posts
         postList = new ArrayList<>();
-
-        // Inicializar adapter
         feedAdapter = new FeedAdapter(postList);
         recyclerView.setAdapter(feedAdapter);
 
-        btnpostagem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Telafeed.this, postagem.class);
-                startActivity(intent);
-                finish();
-            }
+        btnpostagem.setOnClickListener(view -> {
+            Intent intent = new Intent(Telafeed.this, postagem.class);
+            startActivity(intent);
+            finish();
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -69,8 +60,29 @@ public class Telafeed extends AppCompatActivity {
             return insets;
         });
 
-        // Carregar posts do servidor
         carregarPosts();
+    }
+
+    private byte[] descriptografarImagem(String imagemBase64) {
+        try {
+            byte[] imagemCriptografada = Base64.decode(imagemBase64, Base64.DEFAULT);
+            byte[] chave = CHAVE_SECRETA.getBytes();
+            byte[] salt = new byte[16];
+            System.arraycopy(imagemCriptografada, 0, salt, 0, 16);
+
+            byte[] imagemDescriptografada = new byte[imagemCriptografada.length - 16];
+
+            for (int i = 0; i < imagemDescriptografada.length; i++) {
+                imagemDescriptografada[i] = (byte) (imagemCriptografada[i + 16] ^
+                        chave[i % chave.length] ^
+                        salt[i % salt.length]);
+            }
+
+            return imagemDescriptografada;
+        } catch (Exception e) {
+            Log.e("Telafeed", "Erro ao descriptografar imagem: " + e.getMessage());
+            return null;
+        }
     }
 
     private void carregarPosts() {
@@ -101,23 +113,22 @@ public class Telafeed extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                                // Obter dados criptografados
                                 String nomeCriptografado = jsonObject.getString("nome");
                                 String descricaoCriptografada = jsonObject.getString("descricao");
                                 String nota = jsonObject.getString("nota");
-                                String imagem = jsonObject.optString("imagem", "");
+                                String imagem = jsonObject.optString("imagem", null); // Alterado para null como valor padrão
 
-                                // Descriptografar os dados
                                 String nomeDecifrado = decifrarCesar(nomeCriptografado, SHIFT);
                                 String descricaoDecifrada = decifrarCesar(descricaoCriptografada, SHIFT);
 
-                                // Log para debug
                                 Log.d("Telafeed", "Nome criptografado: " + nomeCriptografado);
                                 Log.d("Telafeed", "Nome decifrado: " + nomeDecifrado);
                                 Log.d("Telafeed", "Descrição criptografada: " + descricaoCriptografada);
                                 Log.d("Telafeed", "Descrição decifrada: " + descricaoDecifrada);
+                                Log.d("Telafeed", "Imagem: " + imagem);
 
-                                postList.add(new Post(nomeDecifrado, descricaoDecifrada, nota, imagem));
+                                Post novoPost = new Post(nomeDecifrado, descricaoDecifrada, nota, imagem);
+                                postList.add(novoPost);
                             }
                             runOnUiThread(() -> {
                                 feedAdapter.notifyDataSetChanged();
@@ -145,7 +156,6 @@ public class Telafeed extends AppCompatActivity {
         });
     }
 
-    // Método para descriptografar usando a cifra de César
     private String decifrarCesar(String textoCifrado, int deslocamento) {
         StringBuilder resultado = new StringBuilder();
         for (char caractere : textoCifrado.toCharArray()) {
