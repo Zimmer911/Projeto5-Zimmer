@@ -14,12 +14,13 @@
 
 ## 💬 Descrição do Projeto
 <p align="center">
-    <img src="https://link-para-o-icon-do-ludis" alt="Ludis" border="0" width="350px" height="275px">
+    <img src="/img/Screenshot_4-removebg-preview" alt="Ludis" border="0" width="350px" height="275px">
   </p>
   <br>
   <b>Ludis - Conectando Atletas</b> <br>
   Ludis é uma plataforma inovadora que atua como um LinkedIn voltado especificamente para atletas. O objetivo do aplicativo é facilitar a conexão entre atletas, treinadores, organizações esportivas e patrocinadores, criando uma rede social que valoriza e promove o talento esportivo. Com Ludis, os atletas podem exibir suas conquistas, buscar oportunidades e interagir com outros profissionais do esporte.
   <br>
+  
   <b>Funcionalidades:</b> <br>
   • <b>Perfis Personalizados:</b> Crie um perfil detalhado com informações sobre suas experiências, conquistas, habilidades e fotos. <br>
   • <b>Conexões:</b> Conecte-se com outros atletas, treinadores e patrocinadores para expandir sua rede de contatos. <br>
@@ -33,17 +34,22 @@
   Para executar o projeto localmente, siga os passos abaixo:
   <pre>
   1. Clone o repositório:
+      
      <code>git clone </code>
      <code>cd ludis</code>
   
   2.Instale as dependências
-    No terminal do VScode: 
-    NPM I;
-    NPM RUN DEV;
+      
+     
+   No terminal do VScode: 
+   <code>  NPM I;</code>
+   <code>  NPM RUN DEV;</code>
+
   </pre>
+
   <br>
   <b>Contribuindo:</b> <br>
-  Contribuições são bem-vindas! Se você gostaria de ajudar a melhorar o Ludis, siga estas etapas:
+  Contribuições são bem-vindas sempre! Se você gostaria de ajudar a melhorar o Ludis, entre em contato com a gente e siga estas etapas:
   <pre>
   1. Faça um fork do repositório.
   2. Crie uma nova branch para sua feature ou correção:
@@ -54,6 +60,7 @@
      <code>git push origin minha-feature</code>
   5. Crie um pull request.
   </pre>
+  
   <br>
   <b>Licença:</b> <br>
  <code>LICENSE</code> para mais detalhes.
