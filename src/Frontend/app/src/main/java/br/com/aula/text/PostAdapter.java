@@ -43,10 +43,13 @@ public class PostAdapter {
             holder.textNota.setText(post.getNota());
 
             // Carregar imagem se existir
-            if (!TextUtils.isEmpty(post.getImagem())) {
+            String imagemUrl = post.getImagem();
+            if (!TextUtils.isEmpty(imagemUrl)) {
                 Glide.with(context)
-                        .load("https://ludis.onrender.com/api/image/" + post.getImagem())
+                        .load("https://ludis.onrender.com/api/image/" + imagemUrl)
                         .into(holder.imageView);
+            } else {
+                holder.imageView.setImageResource(android.R.drawable.ic_menu_gallery);
             }
 
             // Configurar botão de comentário
@@ -62,7 +65,6 @@ public class PostAdapter {
             return posts.size();
         }
 
-        // Removido o modificador static
         public class PostViewHolder extends RecyclerView.ViewHolder {
             TextView textNome, textDescricao, textNota;
             ImageView imageView;
@@ -78,4 +80,4 @@ public class PostAdapter {
             }
         }
     }
-    }
+}

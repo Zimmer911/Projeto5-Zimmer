@@ -2,7 +2,9 @@ package br.com.aula.text;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +13,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
 
@@ -40,11 +48,33 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         holder.textDescricao.setText(post.getDescricao());
         holder.textNota.setText(post.getNota());
 
-        // Carregar imagem se existir
-        if (post.getImagem() != null && !post.getImagem().isEmpty()) {
+        // Carregar imagem usando Glide
+        if (!TextUtils.isEmpty(post.getImagem())) {
+            String imageUrl = "https://ludis.onrender.com/api/image/" + post.getImagem();
+            Log.d("FeedAdapter", "Tentando carregar imagem: " + imageUrl);
+
             Glide.with(context)
-                    .load("https://ludis.onrender.com/api/image/" + post.getImagem())
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            Log.e("FeedAdapter", "Erro ao carregar imagem: " + (e != null ? e.getMessage() : "Erro desconhecido"));
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            Log.d("FeedAdapter", "Imagem carregada com sucesso");
+                            return false;
+                        }
+                    })
                     .into(holder.imageView);
+        } else {
+            Log.d("FeedAdapter", "Nenhuma imagem para carregar, usando imagem padrão");
+            holder.imageView.setImageResource(R.drawable.ic_launcher_background);
         }
 
         holder.btnComentar.setOnClickListener(v -> {

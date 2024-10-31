@@ -1,11 +1,9 @@
 package br.com.aula.text;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.view.View;
+import android.util.Base64;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,9 +18,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -41,7 +39,8 @@ public class postagem extends AppCompatActivity {
     private Uri imageUri;
     private Button postarButton;
     private Button escolherImagemButton;
-    private static final int SHIFT = 3; // Deslocamento para a cifra de César
+    private static final int SHIFT = 3;
+    public static final String CHAVE_SECRETA = "MinhaChaveSecreta123";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +56,9 @@ public class postagem extends AppCompatActivity {
         nomeEditText = ((TextInputLayout) findViewById(R.id.inputNome)).getEditText();
         descricaoEditText = ((TextInputLayout) findViewById(R.id.inputDescricao)).getEditText();
         notaEditText = ((TextInputLayout) findViewById(R.id.inputNota)).getEditText();
-        imageView = findViewById(R.id.imageView); // Certifique-se de ter um ImageView no layout
+        imageView = findViewById(R.id.imageView);
         postarButton = findViewById(R.id.buttonpublicar);
-        escolherImagemButton = findViewById(R.id.buttonEscolherImagem); // Botão para escolher imagem
+        escolherImagemButton = findViewById(R.id.buttonEscolherImagem);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -85,8 +84,27 @@ public class postagem extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageUri = data.getData();
-            imageView.setImageURI(imageUri); // Exibir a imagem selecionada
+            imageView.setImageURI(imageUri);
         }
+    }
+
+    private byte[] criptografarImagem(byte[] imagemBytes) {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+
+        byte[] chave = CHAVE_SECRETA.getBytes();
+        byte[] imagemCriptografada = new byte[imagemBytes.length + salt.length];
+
+        System.arraycopy(salt, 0, imagemCriptografada, 0, salt.length);
+
+        for (int i = 0; i < imagemBytes.length; i++) {
+            imagemCriptografada[i + salt.length] = (byte) (imagemBytes[i] ^
+                    chave[i % chave.length] ^
+                    salt[i % salt.length]);
+        }
+
+        return imagemCriptografada;
     }
 
     private void validateAndPost() {
@@ -98,15 +116,14 @@ public class postagem extends AppCompatActivity {
             return;
         }
 
-        // Criptografar os dados antes de enviar
         String nomeCriptografado = cifraCesar(nome, SHIFT);
         String descricaoCriptografada = cifraCesar(descricao, SHIFT);
 
-        // Log para verificar a criptografia
         System.out.println("Nome original: " + nome);
         System.out.println("Nome criptografado: " + nomeCriptografado);
         System.out.println("Descrição original: " + descricao);
         System.out.println("Descrição criptografada: " + descricaoCriptografada);
+
         criarPostagem(nomeCriptografado, descricaoCriptografada, nota);
     }
 
@@ -140,19 +157,21 @@ public class postagem extends AppCompatActivity {
                 .addFormDataPart("descricao", descricao)
                 .addFormDataPart("nota", nota);
 
-        // Adicionar imagem se foi selecionada
         if (imageUri != null) {
             try {
                 InputStream inputStream = getContentResolver().openInputStream(imageUri);
                 byte[] bytes = new byte[inputStream.available()];
                 inputStream.read(bytes);
+                inputStream.close();
 
+                // Remova a criptografia da imagem por enquanto para garantir compatibilidade
                 RequestBody imageBody = RequestBody.create(
                         MediaType.parse(getContentResolver().getType(imageUri)),
                         bytes
                 );
 
                 builder.addFormDataPart("image", "imagem.jpg", imageBody);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Erro ao processar imagem", Toast.LENGTH_SHORT).show();
@@ -167,7 +186,6 @@ public class postagem extends AppCompatActivity {
                 .post(requestBody)
                 .build();
 
-        // Log para verificar os dados enviados
         System.out.println("Enviando para o servidor:");
         System.out.println("Nome: " + nome);
         System.out.println("Descrição: " + descricao);
@@ -216,7 +234,6 @@ public class postagem extends AppCompatActivity {
         });
     }
 
-    // Método para criptografar usando a cifra de César
     private String cifraCesar(String texto, int deslocamento) {
         StringBuilder resultado = new StringBuilder();
         for (char caractere : texto.toCharArray()) {
@@ -228,10 +245,5 @@ public class postagem extends AppCompatActivity {
             }
         }
         return resultado.toString();
-    }
-
-    // Método para descriptografar (pode ser útil para testes)
-    private String decifrarCesar(String textoCifrado, int deslocamento) {
-        return cifraCesar(textoCifrado, 26 - deslocamento);
     }
 }
