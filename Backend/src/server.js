@@ -67,3 +67,5 @@ sequelize
   });
 
 module.exports = app; // Exporta o app para possíveis testes
+
+//comentáriotesteparatentarsubirnogit
