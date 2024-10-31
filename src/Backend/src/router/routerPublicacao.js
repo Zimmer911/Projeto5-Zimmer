@@ -1,16 +1,14 @@
 const { Router } = require("express");
 const PublicacaoController = require("../controller/publicacaoController");
-const multer = require('multer');
-const upload = multer({ storage: multer.memoryStorage() });
 const { validatePublication, validatePublicationId } = require("../middlewares/ValidatePublicacao");
 
 const router = Router();
 
-router.post('/', upload.single('image'), validatePublication, (req, res) => {
+router.post('/', validatePublication, (req, res) => {
   PublicacaoController.create(req, res)
 });
 
-router.put('/:id', upload.single('image'), validatePublication, validatePublicationId, (req, res) => {
+router.put('/:id', validatePublication, validatePublicationId, (req, res) => {
   PublicacaoController.update(req, res)
 });
 

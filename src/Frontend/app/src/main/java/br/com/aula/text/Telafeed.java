@@ -2,15 +2,18 @@ package br.com.aula.text;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.ArrayList;
-import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -20,6 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Telafeed extends AppCompatActivity {
 
@@ -27,7 +32,7 @@ public class Telafeed extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FeedAdapter feedAdapter;
     private List<Post> postList;
-    private OkHttpClient client;
+    private static final int SHIFT = 3; // Adicione esta linha aqui
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +54,19 @@ public class Telafeed extends AppCompatActivity {
         feedAdapter = new FeedAdapter(postList);
         recyclerView.setAdapter(feedAdapter);
 
-        // Inicializar OkHttpClient
-        client = new OkHttpClient();
-
         btnpostagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Telafeed.this, postagem.class);
                 startActivity(intent);
+                finish();
             }
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
         });
 
         // Carregar posts do servidor
@@ -65,6 +74,7 @@ public class Telafeed extends AppCompatActivity {
     }
 
     private void carregarPosts() {
+        OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url("https://ludis.onrender.com/api/publicacao")
                 .build();
@@ -72,46 +82,80 @@ public class Telafeed extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao carregar publicações", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                        "Erro ao carregar posts: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
+                    Log.d("Telafeed", "Resposta do servidor: " + responseData);
+
                     try {
-                        JSONObject json = new JSONObject(responseData);
-                        JSONArray publicacoes = json.getJSONArray("publicacoes");
-                        List<Post> novosPosts = new ArrayList<>();
-
-                        for (int i = 0; i < publicacoes.length(); i++) {
-                            JSONObject publicacao = publicacoes.getJSONObject(i);
-                            String nome = publicacao.getString("nome");
-                            String descricao = publicacao.getString("descricao");
-                            String nota = publicacao.getString("nota");
-                            String imagem = publicacao.optString("imagem", "");
-                            novosPosts.add(new Post(nome, descricao, nota, imagem));
-                        }
-
-                        runOnUiThread(() -> {
+                        JSONObject jsonResponse = new JSONObject(responseData);
+                        if (jsonResponse.has("publicacoes")) {
+                            JSONArray jsonArray = jsonResponse.getJSONArray("publicacoes");
                             postList.clear();
-                            postList.addAll(novosPosts);
-                            feedAdapter.notifyDataSetChanged();
-                        });
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                                // Obter dados criptografados
+                                String nomeCriptografado = jsonObject.getString("nome");
+                                String descricaoCriptografada = jsonObject.getString("descricao");
+                                String nota = jsonObject.getString("nota");
+                                String imagem = jsonObject.optString("imagem", "");
+
+                                // Descriptografar os dados
+                                String nomeDecifrado = decifrarCesar(nomeCriptografado, SHIFT);
+                                String descricaoDecifrada = decifrarCesar(descricaoCriptografada, SHIFT);
+
+                                // Log para debug
+                                Log.d("Telafeed", "Nome criptografado: " + nomeCriptografado);
+                                Log.d("Telafeed", "Nome decifrado: " + nomeDecifrado);
+                                Log.d("Telafeed", "Descrição criptografada: " + descricaoCriptografada);
+                                Log.d("Telafeed", "Descrição decifrada: " + descricaoDecifrada);
+
+                                postList.add(new Post(nomeDecifrado, descricaoDecifrada, nota, imagem));
+                            }
+                            runOnUiThread(() -> {
+                                feedAdapter.notifyDataSetChanged();
+                                Toast.makeText(Telafeed.this,
+                                        "Posts carregados com sucesso",
+                                        Toast.LENGTH_SHORT).show();
+                            });
+                        } else {
+                            runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                                    "Formato de resposta inválido",
+                                    Toast.LENGTH_SHORT).show());
+                        }
                     } catch (JSONException e) {
-                        e.printStackTrace();
-                        runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao processar dados", Toast.LENGTH_SHORT).show());
+                        Log.e("Telafeed", "Erro ao processar JSON: " + e.getMessage());
+                        runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                                "Erro ao processar dados: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show());
                     }
                 } else {
-                    runOnUiThread(() -> Toast.makeText(Telafeed.this, "Erro ao carregar publicações", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(Telafeed.this,
+                            "Erro ao carregar posts: " + response.message(),
+                            Toast.LENGTH_SHORT).show());
                 }
             }
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        carregarPosts(); // Recarrega os posts quando a atividade volta ao primeiro plano
+    // Método para descriptografar usando a cifra de César
+    private String decifrarCesar(String textoCifrado, int deslocamento) {
+        StringBuilder resultado = new StringBuilder();
+        for (char caractere : textoCifrado.toCharArray()) {
+            if (Character.isLetter(caractere)) {
+                char base = Character.isUpperCase(caractere) ? 'A' : 'a';
+                resultado.append((char) (((caractere - base - deslocamento + 26) % 26) + base));
+            } else {
+                resultado.append(caractere);
+            }
+        }
+        return resultado.toString();
     }
 }

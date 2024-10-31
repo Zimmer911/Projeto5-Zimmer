@@ -5,7 +5,7 @@ const UserController = require("../controller/UserController");
 const authenticateToken = require("../middlewares/authenticateToken");
 
 const uploadRoutes = require('./routerUpload');
-const publicacaoRoutes = require('./routerPublicacao');
+const publicacaoRoutes = require('./routerPublicacao')
 
 const router = Router();
 

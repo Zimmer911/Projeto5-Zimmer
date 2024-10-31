@@ -1,34 +1,11 @@
 const Comentario = require("../models/Comentario");
 
-// Função para descriptografar a cifra de César
-function decifrarCesar(textoCifrado, deslocamento) {
-    return textoCifrado
-        .split('')
-        .map(char => {
-            if (char.match(/[a-z]/i)) {
-                const code = char.charCodeAt(0);
-                const base = char.toLowerCase() === char ? 97 : 65;
-                return String.fromCharCode(((code - base - deslocamento + 26) % 26) + base);
-            }
-            return char;
-        })
-        .join('');
-}
-
 const ComentarioController = {
   create: async (req, res) => {
     try {
       const { nome, descricao, nota } = req.body;
 
-      // Descriptografar nome e descrição
-      const nomeDecifrado = decifrarCesar(nome, 3);
-      const descricaoDecifrada = decifrarCesar(descricao, 3);
-
-      const comentarioCriado = await Comentario.create({ 
-        nome: nomeDecifrado, 
-        descricao: descricaoDecifrada, 
-        nota 
-      });
+      const comentarioCriado = await Comentario.create({ nome, descricao, nota });
 
       return res.status(200).json({
         msg: "Comentario criado com sucesso!",
@@ -39,15 +16,13 @@ const ComentarioController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const { nome, descricao, nota } = req.body;
 
-      // Descriptografar nome e descrição
-      const nomeDecifrado = decifrarCesar(nome, 3);
-      const descricaoDecifrada = decifrarCesar(descricao, 3);
+      console.log({ id });
+      console.log({ nome, descricao, nota });
 
       const comentarioUpdate = await Comentario.findByPk(id);
 
@@ -58,8 +33,8 @@ const ComentarioController = {
       }
 
       const updated = await comentarioUpdate.update({
-        nome: nomeDecifrado, 
-        descricao: descricaoDecifrada, 
+        nome, 
+        descricao, 
         nota
       });
       if (updated) {
@@ -67,15 +42,14 @@ const ComentarioController = {
           msg: "Comentario atualizado com sucesso!",
         });
       }
-      return res.status(500).json({
+    return res.status(500).json({
         msg:"Erro ao atualizar comentario"
-      });
+    })
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-
   getAll: async (req, res) => {
     try {
       const comentarios = await Comentario.findAll();
@@ -88,7 +62,6 @@ const ComentarioController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-
   getOne: async (req, res) => {
     try {
       const { id } = req.params;
@@ -101,7 +74,7 @@ const ComentarioController = {
         });
       }
       return res.status(200).json({
-        msg: "Comentario Encontrado",
+        msg: "Comentario Encontrados",
         usuario: comentarioEncontrado,
       });
     } catch (error) {
@@ -109,7 +82,6 @@ const ComentarioController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-
   delete: async (req, res) => {
     try {
       const { id } = req.params;
