@@ -3,6 +3,29 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 
+// Função para descriptografar cifra de César
+function decifrarCesar(textoCifrado, deslocamento) {
+    return textoCifrado
+        .split('')
+        .map(char => {
+            // Preserva caracteres especiais
+            if (char === '@' || char === '.' || /\d/.test(char) || char === '_' || char === '-') {
+                return char;
+            }
+            
+            // Processa apenas letras
+            if (/[A-Za-z]/.test(char)) {
+                const code = char.charCodeAt(0);
+                const base = code >= 97 ? 97 : 65; // base para minúsculas ou maiúsculas
+                return String.fromCharCode(
+                    ((code - base - deslocamento + 26) % 26) + base
+                );
+            }
+            return char;
+        })
+        .join('');
+}
+
 const UserController = {
     create: async (req, res) => {
         try {
