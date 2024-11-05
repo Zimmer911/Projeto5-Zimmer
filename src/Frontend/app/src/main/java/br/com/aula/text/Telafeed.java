@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,7 @@ import java.util.List;
 public class Telafeed extends AppCompatActivity {
 
     private Button btnpostagem;
+    private ImageView imageEngrenagem;
     private RecyclerView recyclerView;
     private FeedAdapter feedAdapter;
     private List<Post> postList;
@@ -41,6 +43,7 @@ public class Telafeed extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_telafeed);
 
+        imageEngrenagem = findViewById(R.id.imageEngrenagem);
         btnpostagem = findViewById(R.id.btnpostagem);
         recyclerView = findViewById(R.id.recyclerViewPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,6 +55,13 @@ public class Telafeed extends AppCompatActivity {
             Intent intent = new Intent(Telafeed.this, postagem.class);
             startActivity(intent);
             finish();
+        });
+
+        // Configurar clique na engrenagem
+        imageEngrenagem.setOnClickListener(view -> {
+            Intent intent = new Intent(Telafeed.this, Config.class);
+            startActivity(intent);
+            // Não finalizamos esta activity para poder voltar para ela
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
