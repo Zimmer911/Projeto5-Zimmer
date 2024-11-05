@@ -1,3 +1,4 @@
+// Backend/src/models/Comentario.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
@@ -11,6 +12,10 @@ const Comentario = sequelize.define('comentario', {
         allowNull: false
     },
     nota: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    publicacaoId: {  // Adicione este campo
         type: DataTypes.INTEGER,
         allowNull: false
     }
