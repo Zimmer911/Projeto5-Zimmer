@@ -1,6 +1,7 @@
 package br.com.aula.text;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -177,12 +181,32 @@ public class CadastroAtleta extends AppCompatActivity {
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response)
                     throws IOException {
                 if (response.isSuccessful()) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(CadastroAtleta.this,
-                                "Cadastro realizado com sucesso!",
-                                Toast.LENGTH_SHORT).show();
-                        navigateToFeed();
-                    });
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonResponse = new JSONObject(responseBody);
+                        JSONObject userObject = jsonResponse.getJSONObject("user");
+                        int userId = userObject.getInt("id");
+
+                        // Salvar o userId no SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt("userId", userId);
+                        editor.apply();
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(CadastroAtleta.this,
+                                    "Cadastro realizado com sucesso!",
+                                    Toast.LENGTH_SHORT).show();
+                            navigateToFeed();
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(() -> {
+                            Toast.makeText(CadastroAtleta.this,
+                                    "Erro ao processar resposta do servidor",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 } else {
                     handleErrorResponse(response);
                 }

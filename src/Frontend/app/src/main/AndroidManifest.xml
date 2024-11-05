@@ -31,8 +31,13 @@
             android:name=".LoginAtleta"
             android:exported="true" />
         <activity
+            android:name=".CadastroAtleta"
+            android:exported="true" />
+        <activity
             android:name=".Principal"
             android:exported="true">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
