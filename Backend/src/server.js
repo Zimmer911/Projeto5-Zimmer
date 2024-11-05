@@ -8,6 +8,7 @@ const fs = require('fs');
 const Comentario = require("./models/Comentario");
 const User = require("./models/User");
 const Publicacao = require("./models/Publicacao");
+const User2 = require("./models/User2");
 
 var cors = require('cors');
 
