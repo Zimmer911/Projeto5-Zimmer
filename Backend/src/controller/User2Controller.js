@@ -31,6 +31,9 @@ const User2Controller = {
         try {
             const { nome, email, senha } = req.body;
 
+            // Log para debug
+            console.log("Recebendo requisição de criação de user2:", req.body);
+
             // Descriptografa nome e email (usando deslocamento 3)
             const nomeDecifrado = decifrarCesar(nome, 3);
             const emailDecifrado = decifrarCesar(email, 3);

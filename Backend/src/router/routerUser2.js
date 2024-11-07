@@ -4,6 +4,7 @@ const { validateUser2, validateUser2Id } = require("../middlewares/ValidateUser2
 
 const router = Router();
 
+
 router.post('/', validateUser2 ,(req,res) => {
     User2Controller.create(req,res)
 });
