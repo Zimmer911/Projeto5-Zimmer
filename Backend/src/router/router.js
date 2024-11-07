@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const userRoutes = require("./routerUser");
+const user2Routes = require("./routerUser2");
 const comentarioRoutes = require("./routerComentario");
 const UserController = require("../controller/UserController");
 const authenticateToken = require("../middlewares/authenticateToken");
@@ -14,6 +15,8 @@ router.use('/comentario', comentarioRoutes);
 router.use('/image', uploadRoutes);
 
 router.use('/user', userRoutes);
+
+router.use('/user2', user2Routes);
 
 router.use('/publicacao', publicacaoRoutes);
 

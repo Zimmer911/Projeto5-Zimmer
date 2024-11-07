@@ -27,7 +27,7 @@ public class Principal extends AppCompatActivity {
         btnIniciar.setOnClickListener(view -> {
 
 
-            Intent intent = new Intent(Principal.this, CadastroAtleta.class);
+            Intent intent = new Intent(Principal.this, TelaCadastro.class);
 
             startActivity(intent);
         });
