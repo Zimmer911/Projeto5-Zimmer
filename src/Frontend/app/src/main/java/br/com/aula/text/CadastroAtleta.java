@@ -148,10 +148,11 @@ public class CadastroAtleta extends AppCompatActivity {
                         JSONObject userObject = jsonResponse.getJSONObject("user");
                         int userId = userObject.getInt("id");
 
-                        // Salvar o userId no SharedPreferences
+                        // Salvar o userId e isClube no SharedPreferences
                         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("userId", userId);
+                        editor.putBoolean("isClube", false); // Marca explicitamente como atleta
                         editor.apply();
 
                         runOnUiThread(() -> {
