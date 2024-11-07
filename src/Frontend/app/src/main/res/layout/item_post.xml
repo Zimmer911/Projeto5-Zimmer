@@ -33,7 +33,7 @@
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="350dp"
             android:layout_marginTop="8dp"
             android:scaleType="centerCrop" />
 
@@ -43,6 +43,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Comentar" />
+
+        <Button
+            android:id="@+id/btnExcluir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Excluir" />
+
+
 
     </LinearLayout>
 
