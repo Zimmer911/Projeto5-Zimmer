@@ -1,7 +1,5 @@
 package br.com.aula.text;
 
-import static br.com.aula.text.CadastroAtleta.SHIFT;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -66,12 +64,9 @@ public class Config extends AppCompatActivity {
             return;
         }
 
-        // Criptografar a senha usando cifra de César
-        String senhaCriptografada = cifraCesar(newPassword, SHIFT);
-
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("senha", senhaCriptografada);
+            jsonBody.put("senha", newPassword);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -86,8 +81,6 @@ public class Config extends AppCompatActivity {
 
         // Log para debug
         System.out.println("Alterando senha - URL: " + BASE_URL + endpoint + userId);
-        System.out.println("Senha original: " + newPassword);
-        System.out.println("Senha criptografada: " + senhaCriptografada);
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -111,20 +104,6 @@ public class Config extends AppCompatActivity {
             }
         });
     }
-
-    private String cifraCesar(String texto, int deslocamento) {
-        StringBuilder resultado = new StringBuilder();
-        for (char caractere : texto.toCharArray()) {
-            if (Character.isLetter(caractere)) {
-                char base = Character.isUpperCase(caractere) ? 'A' : 'a';
-                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
-            } else {
-                resultado.append(caractere);
-            }
-        }
-        return resultado.toString();
-    }
-
 
     private void deleteAccount() {
         // Log para debug
