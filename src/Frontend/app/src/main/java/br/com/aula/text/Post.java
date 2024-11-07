@@ -1,16 +1,26 @@
 package br.com.aula.text;
 
 public class Post {
+    private int id;
     private String nome;
     private String descricao;
     private String nota;
     private String imagem; // Mudando para String para armazenar a URL da imagem
 
-    public Post(String nome, String descricao, String nota, String imagem) {
+    public Post(int id, String nome, String descricao, String nota, String imagem) {
+        this.id = id;
         this.nome = nome;
         this.descricao = descricao;
         this.nota = nota;
         this.imagem = imagem;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNome() {

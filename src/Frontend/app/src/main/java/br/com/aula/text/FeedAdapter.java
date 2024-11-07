@@ -1,5 +1,6 @@
 package br.com.aula.text;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +25,14 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import java.io.IOException;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder> {
     private List<Post> posts;
@@ -82,11 +91,53 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             intent.putExtra("post_id", position);
             context.startActivity(intent);
         });
+
+        // Adicionar listener para o botão excluir
+        holder.btnExcluir.setOnClickListener(v -> {
+            excluirPost(post.getId(), position);
+        });
     }
 
     @Override
     public int getItemCount() {
         return posts.size();
+    }
+
+    // Método para excluir post
+    private void excluirPost(int postId, int position) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://ludis.onrender.com/api/publicacao/" + postId)
+                .delete()
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                ((Activity) context).runOnUiThread(() -> {
+                    Toast.makeText(context, "Erro ao excluir post: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    ((Activity) context).runOnUiThread(() -> {
+                        posts.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, posts.size());
+                        Toast.makeText(context, "Post excluído com sucesso",
+                                Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    ((Activity) context).runOnUiThread(() -> {
+                        Toast.makeText(context, "Erro ao excluir post: " + response.message(),
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
     }
 
     public class FeedViewHolder extends RecyclerView.ViewHolder {
@@ -95,6 +146,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         TextView textNota;
         ImageView imageView;
         Button btnComentar;
+        Button btnExcluir;
 
         public FeedViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -103,6 +155,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             textNota = itemView.findViewById(R.id.textNota);
             imageView = itemView.findViewById(R.id.imageView);
             btnComentar = itemView.findViewById(R.id.btnComentar);
+            btnExcluir = itemView.findViewById(R.id.btnExcluir);
         }
     }
 }

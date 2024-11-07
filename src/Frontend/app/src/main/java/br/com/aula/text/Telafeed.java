@@ -123,21 +123,23 @@ public class Telafeed extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
+                                int id = jsonObject.getInt("id");
                                 String nomeCriptografado = jsonObject.getString("nome");
                                 String descricaoCriptografada = jsonObject.getString("descricao");
                                 String nota = jsonObject.getString("nota");
-                                String imagem = jsonObject.optString("imagem", null); // Alterado para null como valor padrão
+                                String imagem = jsonObject.optString("imagem", null);
 
                                 String nomeDecifrado = decifrarCesar(nomeCriptografado, SHIFT);
                                 String descricaoDecifrada = decifrarCesar(descricaoCriptografada, SHIFT);
 
+                                Log.d("Telafeed", "ID: " + id);
                                 Log.d("Telafeed", "Nome criptografado: " + nomeCriptografado);
                                 Log.d("Telafeed", "Nome decifrado: " + nomeDecifrado);
                                 Log.d("Telafeed", "Descrição criptografada: " + descricaoCriptografada);
                                 Log.d("Telafeed", "Descrição decifrada: " + descricaoDecifrada);
                                 Log.d("Telafeed", "Imagem: " + imagem);
 
-                                Post novoPost = new Post(nomeDecifrado, descricaoDecifrada, nota, imagem);
+                                Post novoPost = new Post(id, nomeDecifrado, descricaoDecifrada, nota, imagem);
                                 postList.add(novoPost);
                             }
                             runOnUiThread(() -> {
@@ -177,5 +179,23 @@ public class Telafeed extends AppCompatActivity {
             }
         }
         return resultado.toString();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        carregarPosts(); // Recarrega os posts quando a activity voltar ao primeiro plano
+    }
+
+    // Método para atualizar a lista após exclusão
+    public void atualizarListaAposExclusao(int position) {
+        postList.remove(position);
+        feedAdapter.notifyItemRemoved(position);
+        feedAdapter.notifyItemRangeChanged(position, postList.size());
+    }
+
+    // Método para recarregar todos os posts
+    public void recarregarPosts() {
+        carregarPosts();
     }
 }
