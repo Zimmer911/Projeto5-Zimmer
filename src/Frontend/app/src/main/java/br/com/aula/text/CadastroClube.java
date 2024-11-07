@@ -3,29 +3,19 @@ package br.com.aula.text;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.util.Base64;
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.google.android.material.textfield.TextInputLayout;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -37,9 +27,7 @@ public class CadastroClube extends AppCompatActivity {
     private EditText emailEditText;
     private EditText senhaEditText;
     private Button cadastrarButton;
-
-    private static final String HASH_ALGORITHM = "SHA-256";
-    private static final int SALT_LENGTH = 16;
+    private static final int SHIFT = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +65,19 @@ public class CadastroClube extends AppCompatActivity {
             return;
         }
 
-        cadastrar(nome, email, senha);
+        // Criptografa nome, email e senha usando cifra de César
+        String nomeCriptografado = cifraCesar(nome, SHIFT);
+        String emailCriptografado = cifraCesar(email, SHIFT);
+        String senhaCriptografada = cifraCesar(senha, SHIFT);
+
+        System.out.println("Nome original: " + nome);
+        System.out.println("Email original: " + email);
+        System.out.println("Senha original: " + senha);
+        System.out.println("Nome criptografado: " + nomeCriptografado);
+        System.out.println("Email criptografado: " + emailCriptografado);
+        System.out.println("Senha criptografada: " + senhaCriptografada);
+
+        cadastrar(nomeCriptografado, emailCriptografado, senhaCriptografada);
     }
 
     private boolean validateFields(String nome, String email, String senha) {
@@ -99,40 +99,10 @@ public class CadastroClube extends AppCompatActivity {
         return true;
     }
 
-    private byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[SALT_LENGTH];
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    private String hashPassword(String password, byte[] salt) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
-            digest.reset();
-            digest.update(salt);
-            byte[] hash = digest.digest(password.getBytes());
-
-            byte[] saltedHash = new byte[salt.length + hash.length];
-            System.arraycopy(salt, 0, saltedHash, 0, salt.length);
-            System.arraycopy(hash, 0, saltedHash, salt.length, hash.length);
-
-            return Base64.encodeToString(saltedHash, Base64.DEFAULT);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     private String cifraCesar(String texto, int deslocamento) {
         StringBuilder resultado = new StringBuilder();
         for (char caractere : texto.toCharArray()) {
-            if (Character.isLetter(caractere)) {
-                int base = Character.isUpperCase(caractere) ? 'A' : 'a';
-                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
-            } else {
-                resultado.append(caractere);
-            }
+            resultado.append((char) (caractere + deslocamento));
         }
         return resultado.toString();
     }
@@ -141,25 +111,10 @@ public class CadastroClube extends AppCompatActivity {
         CustomTrustManager customTrustManager = new CustomTrustManager();
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        byte[] salt = generateSalt();
-        String senhaHash = hashPassword(senha, salt);
-
-        if (senhaHash == null) {
-            Toast.makeText(CadastroClube.this,
-                    "Erro ao processar senha",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        System.out.println("Nome original: " + nome);
-        System.out.println("Email original: " + email);
-        System.out.println("Nome criptografado: " + cifraCesar(nome, 3));
-        System.out.println("Email criptografado: " + cifraCesar(email, 3));
-
         RequestBody requestBody = new okhttp3.FormBody.Builder()
-                .add("nome", cifraCesar(nome, 3))
-                .add("email", cifraCesar(email, 3))
-                .add("senha", senhaHash)
+                .add("nome", nome)
+                .add("email", email)
+                .add("senha", senha)
                 .build();
 
         Request request = new Request.Builder()
@@ -181,12 +136,32 @@ public class CadastroClube extends AppCompatActivity {
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response)
                     throws IOException {
                 if (response.isSuccessful()) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(CadastroClube.this,
-                                "Cadastro realizado com sucesso!",
-                                Toast.LENGTH_SHORT).show();
-                        navigateToFeed();
-                    });
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonResponse = new JSONObject(responseBody);
+                        JSONObject userObject = jsonResponse.getJSONObject("user2");
+                        int userId = userObject.getInt("id");
+
+                        // Salvar o userId no SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putInt("userId", userId);
+                        editor.apply();
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(CadastroClube.this,
+                                    "Cadastro realizado com sucesso!",
+                                    Toast.LENGTH_SHORT).show();
+                            navigateToFeed();
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(() -> {
+                            Toast.makeText(CadastroClube.this,
+                                    "Erro ao processar resposta do servidor",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 } else {
                     handleErrorResponse(response);
                 }

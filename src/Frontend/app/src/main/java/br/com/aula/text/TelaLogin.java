@@ -46,11 +46,15 @@ public class TelaLogin extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Botão de login de clube clicado");
-                // Implementar a lógica para o login do clube aqui
-                Toast.makeText(TelaLogin.this, "Login de clube não implementado ainda", Toast.LENGTH_SHORT).show();
+                try {
+                    Intent intent = new Intent(TelaLogin.this, LoginClube.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Erro ao iniciar LoginClube", e);
+                    Toast.makeText(TelaLogin.this, "Erro ao abrir tela de login de clube", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
