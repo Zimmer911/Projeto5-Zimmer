@@ -63,5 +63,21 @@
         app:layout_constraintVertical_bias="0.075"
         app:srcCompat="@drawable/logocerto" />
 
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="301dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:backgroundTint="@color/roxobotão"
+        android:text="Login"
+        android:textSize="23dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.78" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

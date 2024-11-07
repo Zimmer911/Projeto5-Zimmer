@@ -181,32 +181,12 @@ public class CadastroClube extends AppCompatActivity {
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response)
                     throws IOException {
                 if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    try {
-                        JSONObject jsonResponse = new JSONObject(responseBody);
-                        JSONObject userObject = jsonResponse.getJSONObject("user");
-                        int userId = userObject.getInt("id");
-
-                        // Salvar o userId no SharedPreferences
-                        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putInt("userId", userId);
-                        editor.apply();
-
-                        runOnUiThread(() -> {
-                            Toast.makeText(CadastroClube.this,
-                                    "Cadastro realizado com sucesso!",
-                                    Toast.LENGTH_SHORT).show();
-                            navigateToFeed();
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        runOnUiThread(() -> {
-                            Toast.makeText(CadastroClube.this,
-                                    "Erro ao processar resposta do servidor",
-                                    Toast.LENGTH_SHORT).show();
-                        });
-                    }
+                    runOnUiThread(() -> {
+                        Toast.makeText(CadastroClube.this,
+                                "Cadastro realizado com sucesso!",
+                                Toast.LENGTH_SHORT).show();
+                        navigateToFeed();
+                    });
                 } else {
                     handleErrorResponse(response);
                 }

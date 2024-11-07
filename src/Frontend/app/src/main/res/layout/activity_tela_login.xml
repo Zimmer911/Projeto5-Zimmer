@@ -9,7 +9,7 @@
     tools:context=".TelaLogin">
 
     <Button
-        android:id="@+id/btnCadastroAtleta"
+        android:id="@+id/btnTelaLoginAtleta"
         android:layout_width="301dp"
         android:layout_height="65dp"
         android:layout_marginStart="50dp"
@@ -24,7 +24,7 @@
         app:layout_constraintVertical_bias="0.70" />
 
     <Button
-        android:id="@+id/btnCadastroClube"
+        android:id="@+id/btnTelaLoginClube"
         android:layout_width="301dp"
         android:layout_height="65dp"
         android:layout_marginStart="50dp"
