@@ -16,13 +16,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 
-import org.json.JSONObject;
-
 import java.io.IOException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class LoginAtleta extends AppCompatActivity {
@@ -37,28 +34,17 @@ public class LoginAtleta extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_loginatleta);
 
-        // Configuração do layout
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Inicialização das views
-        TextInputLayout emailInputLayout = findViewById(R.id.textInputEmail);
-        TextInputLayout senhaInputLayout = findViewById(R.id.textInputSenha);
-
-        emailEditText = emailInputLayout.getEditText();
-        senhaEditText = senhaInputLayout.getEditText();
+        emailEditText = ((TextInputLayout) findViewById(R.id.textInputEmail)).getEditText();
+        senhaEditText = ((TextInputLayout) findViewById(R.id.textInputSenha)).getEditText();
         loginButton = findViewById(R.id.buttonLogin);
 
-        // Configuração do botão de login
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fazerLogin();
-            }
-        });
+        loginButton.setOnClickListener(v -> fazerLogin());
     }
 
     private void fazerLogin() {
@@ -71,23 +57,17 @@ public class LoginAtleta extends AppCompatActivity {
             return;
         }
 
-        // Criptografar email usando cifra de César
-        String emailCriptografado = cifraCesar(email, 3);
-
         // Criar cliente HTTP e requisição
         CustomTrustManager customTrustManager = new CustomTrustManager();
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
-        // Criar corpo da requisição
-        RequestBody requestBody = new okhttp3.FormBody.Builder()
-                .add("email", emailCriptografado)
-                .add("senha", senha)
-                .build();
+        // Criar URL com email e senha como parâmetros (não é seguro, mas para fins de simplicidade)
+        String url = "https://ludis.onrender.com/api/user/login?email=" + email + "&senha=" + senha;
 
-        // Criar requisição
+        // Fazer a requisição GET
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/user/login")
-                .post(requestBody)
+                .url(url)
+                .get()
                 .build();
 
         // Fazer a requisição assíncrona
@@ -95,61 +75,27 @@ public class LoginAtleta extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(LoginAtleta.this,
-                            "Erro de conexão: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginAtleta.this, "Erro de conexão: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
 
             @Override
             public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws IOException {
-                try {
-                    String responseBody = response.body().string();
-                    JSONObject jsonResponse = new JSONObject(responseBody);
-
-                    if (response.isSuccessful()) {
-                        // Login bem-sucedido
-                        runOnUiThread(() -> {
-                            Toast.makeText(LoginAtleta.this,
-                                    "Login realizado com sucesso!",
-                                    Toast.LENGTH_SHORT).show();
-
-                            // Navegar para o feed
-                            Intent intent = new Intent(LoginAtleta.this, Telafeed.class);
-                            startActivity(intent);
-                            finish(); // Fecha a tela de login
-                        });
-                    } else {
-                        // Login falhou
-                        final String errorMessage = jsonResponse.optString("msg", "Erro ao fazer login");
-                        runOnUiThread(() -> {
-                            Toast.makeText(LoginAtleta.this,
-                                    errorMessage,
-                                    Toast.LENGTH_SHORT).show();
-                        });
-                    }
-                } catch (Exception e) {
+                if (response.isSuccessful()) {
+                    // Login bem-sucedido
                     runOnUiThread(() -> {
-                        Toast.makeText(LoginAtleta.this,
-                                "Erro ao processar resposta do servidor",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginAtleta.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginAtleta.this, Telafeed.class);
+                        startActivity(intent);
+                        finish(); // Fecha a tela de login
+                    });
+                } else {
+                    // Login falhou
+                    runOnUiThread(() -> {
+                        Toast.makeText(LoginAtleta.this, "Email ou senha incorretos", Toast.LENGTH_SHORT).show();
                     });
                 }
             }
         });
-    }
-
-    // Método para criptografar usando a cifra de César
-    private String cifraCesar(String texto, int deslocamento) {
-        StringBuilder resultado = new StringBuilder();
-        for (char caractere : texto.toCharArray()) {
-            if (Character.isLetter(caractere)) {
-                int base = Character.isUpperCase(caractere) ? 'A' : 'a';
-                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
-            } else {
-                resultado.append(caractere);
-            }
-        }
-        return resultado.toString();
     }
 }
