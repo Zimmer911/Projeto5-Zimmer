@@ -3,52 +3,14 @@
 const User2 = require("../models/User2");
 const jwt = require('jsonwebtoken');
 
-// Função para descriptografar cifra de César
-function decifrarCesar(textoCifrado, deslocamento) {
-    return textoCifrado
-        .split('')
-        .map(char => {
-            // Preserva caracteres especiais
-            if (char === '@' || char === '.' || /\d/.test(char) || char === '_' || char === '-') {
-                return char;
-            }
-            
-            // Processa apenas letras
-            if (/[A-Za-z]/.test(char)) {
-                const code = char.charCodeAt(0);
-                const base = code >= 97 ? 97 : 65; // base para minúsculas ou maiúsculas
-                return String.fromCharCode(
-                    ((code - base - deslocamento + 26) % 26) + base
-                );
-            }
-            return char;
-        })
-        .join('');
-}
-
 const User2Controller = {
     create: async (req, res) => {
         try {
             const { nome, email, senha } = req.body;
 
-            // Log para debug
-            console.log("Recebendo requisição de criação de user2:", req.body);
-
-            // Descriptografa nome e email (usando deslocamento 3)
-            const nomeDecifrado = decifrarCesar(nome, 3);
-            const emailDecifrado = decifrarCesar(email, 3);
-
-            // Log adicionado para verificar os dados recebidos e decifrados
-            console.log("Dados recebidos:", {
-                nomeOriginal: nome,
-                emailOriginal: email,
-                nomeDecifrado: nomeDecifrado,
-                emailDecifrado: emailDecifrado
-            });
-
             const user2Criado = await User2.create({ 
-                nome: nomeDecifrado, 
-                email: emailDecifrado, 
+                nome, 
+                email, 
                 senha 
             });
 
