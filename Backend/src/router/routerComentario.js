@@ -9,9 +9,10 @@ router.post('/', validateComentario, (req, res) => {
     ComentarioController.create(req, res);
 });
 
-// Rota para obter todos os comentários (com suporte para postId)
+// Rota para obter todos os comentários
 router.get('/', (req, res) => {
-    ComentarioController.getAll(req, res);
+    const postId = req.query.postId; // Se você deseja filtrar por postId
+    ComentarioController.getAll(req, res, postId); // Ajuste o método no controller para aceitar postId
 });
 
 // Rota para atualizar um comentário existente
