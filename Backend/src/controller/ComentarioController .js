@@ -3,13 +3,13 @@ const Comentario = require("../models/Comentario");
 const ComentarioController = {
   create: async (req, res) => {
     try {
-      const { nome, descricao, nota } = req.body;
+      const { nome, descricao, nota, postId } = req.body; // Incluindo postId
 
-      const comentarioCriado = await Comentario.create({ nome, descricao, nota });
+      const comentarioCriado = await Comentario.create({ nome, descricao, nota, postId }); // Adicionando postId na criação
 
       return res.status(200).json({
         msg: "Comentario criado com sucesso!",
-        user: comentarioCriado,
+        comentario: comentarioCriado, // Corrigido para 'comentario'
       });
     } catch (error) {
       console.error(error);
@@ -42,9 +42,9 @@ const ComentarioController = {
           msg: "Comentario atualizado com sucesso!",
         });
       }
-    return res.status(500).json({
+      return res.status(500).json({
         msg:"Erro ao atualizar comentario"
-    })
+      });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
@@ -74,7 +74,7 @@ const ComentarioController = {
         });
       }
       return res.status(200).json({
-        msg: "Comentario Encontrados",
+        msg: "Comentario Encontrado",
         usuario: comentarioEncontrado,
       });
     } catch (error) {
@@ -103,6 +103,17 @@ const ComentarioController = {
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
+  getByPostId: async (req, res) => { // Nova função para buscar comentários por postId
+    try {
+      const { postId } = req.params; // Captura o postId da URL
+      const comentarios = await Comentario.findAll({ where: { postId } });
+
+      return res.status(200).json(comentarios);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Erro ao buscar comentários" });
+    }
+  }
 };
 
 module.exports = ComentarioController;

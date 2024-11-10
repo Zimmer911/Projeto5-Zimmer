@@ -176,6 +176,9 @@ public class CadastroAtleta extends AppCompatActivity {
         });
     }
 
+
+
+
     private void navigateToFeed() {
         Intent intent = new Intent(CadastroAtleta.this, Telafeed.class);
         startActivity(intent);
