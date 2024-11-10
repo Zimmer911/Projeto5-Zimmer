@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class Principal extends AppCompatActivity {
 
     private Button btnIniciar;
-    private Button btnClube;
+    private Button btnLogin;
 
 
     @Override
@@ -23,14 +23,18 @@ public class Principal extends AppCompatActivity {
         setContentView(R.layout.activity_principal);
 
         btnIniciar = findViewById(R.id.btnEntrar);
-
         btnIniciar.setOnClickListener(view -> {
-
-
-            Intent intent = new Intent(Principal.this, LoginAtleta.class);
-
+            Intent intent = new Intent(Principal.this, TelaCadastro.class);
             startActivity(intent);
         });
+
+
+        btnLogin = findViewById(R.id.btnLogin);
+        btnLogin.setOnClickListener(view -> {
+            Intent intent = new Intent(Principal.this, TelaLogin.class);
+            startActivity(intent);
+        });
+
 
 
 

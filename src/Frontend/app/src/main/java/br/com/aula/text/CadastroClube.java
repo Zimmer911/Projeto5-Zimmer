@@ -6,27 +6,22 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.google.android.material.textfield.TextInputLayout;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class CadastroAtleta extends AppCompatActivity {
+public class CadastroClube extends AppCompatActivity {
 
     private EditText nomeEditText;
     private EditText emailEditText;
@@ -38,17 +33,17 @@ public class CadastroAtleta extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_cadastroatleta);
+        setContentView(R.layout.activity_cadastro_clube);
 
         initializeViews();
         setupListeners();
     }
 
     private void initializeViews() {
-        nomeEditText = ((TextInputLayout) findViewById(R.id.textInputNome)).getEditText();
-        emailEditText = ((TextInputLayout) findViewById(R.id.textInputEmail)).getEditText();
-        senhaEditText = ((TextInputLayout) findViewById(R.id.textInputSenha)).getEditText();
-        cadastrarButton = findViewById(R.id.buttonCadastrar);
+        nomeEditText = ((TextInputLayout) findViewById(R.id.textInputNomeClube)).getEditText();
+        emailEditText = ((TextInputLayout) findViewById(R.id.textInputEmailClube)).getEditText();
+        senhaEditText = ((TextInputLayout) findViewById(R.id.textInputSenhaClube)).getEditText();
+        cadastrarButton = findViewById(R.id.buttonCadastrarClube);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -70,10 +65,9 @@ public class CadastroAtleta extends AppCompatActivity {
             return;
         }
 
-        // Criptografa nome e email usando cifra de César
+        // Criptografa nome, email e senha usando cifra de César
         String nomeCriptografado = cifraCesar(nome, SHIFT);
         String emailCriptografado = cifraCesar(email, SHIFT);
-        // Criptografa a senha somando 3 ao valor ASCII
         String senhaCriptografada = cifraCesar(senha, SHIFT);
 
         System.out.println("Nome original: " + nome);
@@ -124,7 +118,7 @@ public class CadastroAtleta extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/user")
+                .url("https://ludis.onrender.com/api/user2")
                 .post(requestBody)
                 .build();
 
@@ -132,7 +126,7 @@ public class CadastroAtleta extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(CadastroAtleta.this,
+                    Toast.makeText(CadastroClube.this,
                             "Erro ao cadastrar usuário: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
@@ -145,18 +139,18 @@ public class CadastroAtleta extends AppCompatActivity {
                     String responseBody = response.body().string();
                     try {
                         JSONObject jsonResponse = new JSONObject(responseBody);
-                        JSONObject userObject = jsonResponse.getJSONObject("user");
+                        JSONObject userObject = jsonResponse.getJSONObject("user2");
                         int userId = userObject.getInt("id");
 
                         // Salvar o userId e isClube no SharedPreferences
                         SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("userId", userId);
-                        editor.putBoolean("isClube", false); // Marca explicitamente como atleta
+                        editor.putBoolean("isClube", true); // Marca explicitamente como clube
                         editor.apply();
 
                         runOnUiThread(() -> {
-                            Toast.makeText(CadastroAtleta.this,
+                            Toast.makeText(CadastroClube.this,
                                     "Cadastro realizado com sucesso!",
                                     Toast.LENGTH_SHORT).show();
                             navigateToFeed();
@@ -164,7 +158,7 @@ public class CadastroAtleta extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(() -> {
-                            Toast.makeText(CadastroAtleta.this,
+                            Toast.makeText(CadastroClube.this,
                                     "Erro ao processar resposta do servidor",
                                     Toast.LENGTH_SHORT).show();
                         });
@@ -176,11 +170,8 @@ public class CadastroAtleta extends AppCompatActivity {
         });
     }
 
-
-
-
     private void navigateToFeed() {
-        Intent intent = new Intent(CadastroAtleta.this, Telafeed.class);
+        Intent intent = new Intent(CadastroClube.this, Telafeed.class);
         startActivity(intent);
         finish();
     }
@@ -188,7 +179,7 @@ public class CadastroAtleta extends AppCompatActivity {
     private void handleErrorResponse(Response response) throws IOException {
         final String errorBody = response.body().string();
         runOnUiThread(() -> {
-            Toast.makeText(CadastroAtleta.this,
+            Toast.makeText(CadastroClube.this,
                     "Erro ao cadastrar: " + errorBody,
                     Toast.LENGTH_SHORT).show();
         });

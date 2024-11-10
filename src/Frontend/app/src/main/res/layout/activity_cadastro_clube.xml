@@ -3,13 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="#8C9DCA"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CadastroAtleta">
+    tools:context=".CadastroClube">
 
     <ImageView
-        android:id="@+id/btnVoltar"
+        android:id="@+id/btnVoltarClube"
         android:layout_width="25dp"
         android:layout_height="25dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -21,10 +20,10 @@
         app:srcCompat="@drawable/back" />
 
     <TextView
-        android:id="@+id/Titulo"
+        android:id="@+id/TituloClube"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Crie sua conta, atleta!"
+        android:text="Crie sua conta, clube!"
         android:textColor="#000000"
         android:textSize="34sp"
         android:textStyle="bold"
@@ -35,11 +34,11 @@
         app:layout_constraintVertical_bias="0.136" />
 
     <TextView
-        android:id="@+id/textNome"
+        android:id="@+id/textNomeClube"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/nome_label"
-        android:textColor="#FFFEFE"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.15"
@@ -48,7 +47,7 @@
         app:layout_constraintVertical_bias="0.255" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputNome"
+        android:id="@+id/textInputNomeClube"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -59,7 +58,7 @@
         app:layout_constraintVertical_bias="0.30">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textInputEditTextNome"
+            android:id="@+id/textInputEditTextNomeClube"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/nome_label" />
@@ -70,7 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/email_label"
-        android:textColor="#FFFEFE"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.146"
@@ -79,7 +78,7 @@
         app:layout_constraintVertical_bias="0.397" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputEmail"
+        android:id="@+id/textInputEmailClube"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -90,18 +89,18 @@
         app:layout_constraintVertical_bias="0.450">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textInputEditTextEmail"
+            android:id="@+id/textInputEditTextEmailClube"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/email_label" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/textView7Clube"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CPF"
-        android:textColor="#FFFEFE"
+        android:text="CNPJ"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.147"
@@ -110,7 +109,7 @@
         app:layout_constraintVertical_bias="0.529" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputSenha"
+        android:id="@+id/textInputSenhaClube"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -121,14 +120,14 @@
         app:layout_constraintVertical_bias="0.591">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textInputEditTextSenha"
+            android:id="@+id/textInputEditTextSenhaClube"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/cpf_label" />
+            android:hint="CNPJ" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/buttonCadastrar"
+        android:id="@+id/buttonCadastrarClube"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/black"
@@ -141,7 +140,7 @@
         app:layout_constraintVertical_bias="0.774" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/imageViewClube"
         android:layout_width="143dp"
         android:layout_height="434dp"
         app:layout_constraintBottom_toBottomOf="parent"

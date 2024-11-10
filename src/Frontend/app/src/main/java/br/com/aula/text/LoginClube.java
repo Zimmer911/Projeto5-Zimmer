@@ -25,7 +25,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class LoginAtleta extends AppCompatActivity {
+public class LoginClube extends AppCompatActivity {
 
     private EditText emailEditText;
     private EditText senhaEditText;
@@ -36,18 +36,25 @@ public class LoginAtleta extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_loginatleta);
+        setContentView(R.layout.activity_login_clube);
+
+        initializeViews();
+        setupListeners();
+    }
+
+    private void initializeViews() {
+        emailEditText = ((TextInputLayout) findViewById(R.id.textInputEmailClube)).getEditText();
+        senhaEditText = ((TextInputLayout) findViewById(R.id.textInputSenhaClube)).getEditText();
+        loginButton = findViewById(R.id.buttonLoginClube);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
 
-        emailEditText = ((TextInputLayout) findViewById(R.id.textInputEmail)).getEditText();
-        senhaEditText = ((TextInputLayout) findViewById(R.id.textInputSenha)).getEditText();
-        loginButton = findViewById(R.id.buttonLogin);
-
+    private void setupListeners() {
         loginButton.setOnClickListener(v -> fazerLogin());
     }
 
@@ -83,7 +90,7 @@ public class LoginAtleta extends AppCompatActivity {
         OkHttpClient client = customTrustManager.getOkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/user")
+                .url("https://ludis.onrender.com/api/user2")  // Note o "user2" para clubes
                 .get()
                 .build();
 
@@ -91,7 +98,7 @@ public class LoginAtleta extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull okhttp3.Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(LoginAtleta.this,
+                    Toast.makeText(LoginClube.this,
                             "Erro de conexão: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
@@ -106,8 +113,8 @@ public class LoginAtleta extends AppCompatActivity {
                         JSONObject jsonResponse = new JSONObject(responseData);
                         JSONArray usuarios = jsonResponse.getJSONArray("usuarios");
 
-                        // Verificar se existe um usuário com o email e senha fornecidos
-                        boolean usuarioEncontrado = false;
+                        // Verificar se existe um clube com o email e senha fornecidos
+                        boolean clubeEncontrado = false;
                         for (int i = 0; i < usuarios.length(); i++) {
                             JSONObject usuario = usuarios.getJSONObject(i);
                             String emailUsuario = usuario.getString("email");
@@ -118,22 +125,22 @@ public class LoginAtleta extends AppCompatActivity {
 
                             if (emailUsuario.equals(emailCriptografado) &&
                                     senhaUsuario.equals(senhaCriptografada)) {
-                                usuarioEncontrado = true;
+                                clubeEncontrado = true;
                                 break;
                             }
                         }
 
-                        final boolean encontrado = usuarioEncontrado;
+                        final boolean encontrado = clubeEncontrado;
                         runOnUiThread(() -> {
                             if (encontrado) {
-                                Toast.makeText(LoginAtleta.this,
+                                Toast.makeText(LoginClube.this,
                                         "Login realizado com sucesso!",
                                         Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(LoginAtleta.this, Telafeed.class);
+                                Intent intent = new Intent(LoginClube.this, Telafeed.class);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                Toast.makeText(LoginAtleta.this,
+                                Toast.makeText(LoginClube.this,
                                         "Email ou senha incorretos",
                                         Toast.LENGTH_SHORT).show();
                             }
@@ -142,14 +149,14 @@ public class LoginAtleta extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(() -> {
-                            Toast.makeText(LoginAtleta.this,
+                            Toast.makeText(LoginClube.this,
                                     "Erro ao processar dados do servidor",
                                     Toast.LENGTH_SHORT).show();
                         });
                     }
                 } else {
                     runOnUiThread(() -> {
-                        Toast.makeText(LoginAtleta.this,
+                        Toast.makeText(LoginClube.this,
                                 "Erro ao verificar credenciais",
                                 Toast.LENGTH_SHORT).show();
                     });

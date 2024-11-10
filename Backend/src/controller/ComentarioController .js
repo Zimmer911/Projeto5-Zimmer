@@ -2,20 +2,37 @@ const Comentario = require("../models/Comentario");
 
 const ComentarioController = {
   create: async (req, res) => {
-    try {
-      const { nome, descricao, nota } = req.body;
+      try {
+          const { nome, descricao, nota, postId } = req.body; // Adicionando postId
 
-      const comentarioCriado = await Comentario.create({ nome, descricao, nota });
+          const comentarioCriado = await Comentario.create({ nome, descricao, nota, postId }); // Incluindo postId
 
-      return res.status(200).json({
-        msg: "Comentario criado com sucesso!",
-        user: comentarioCriado,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Acione o Suporte" });
-    }
+          return res.status(200).json({
+              msg: "Comentario criado com sucesso!",
+              user: comentarioCriado,
+          });
+      } catch (error) {
+          console.error(error);
+          return res.status(500).json({ msg: "Acione o Suporte" });
+      }
   },
+
+  getByPostId: async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const comentarios = await Comentario.findAll({ where: { postId } });
+
+        return res.status(200).json({
+            msg: "Comentarios encontrados!",
+            comentarios,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: "Acione o Suporte" });
+    }
+},
+
+
   update: async (req, res) => {
     try {
       const { id } = req.params;

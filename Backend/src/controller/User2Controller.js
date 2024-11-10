@@ -1,14 +1,14 @@
-// Backend/src/controller/UserController.js
+// Backend/src/controller/User2Controller.js
 
-const User = require("../models/User");
+const User2 = require("../models/User2");
 const jwt = require('jsonwebtoken');
 
-const UserController = {
+const User2Controller = {
     create: async (req, res) => {
         try {
             const { nome, email, senha } = req.body;
 
-            const userCriado = await User.create({ 
+            const user2Criado = await User2.create({ 
                 nome, 
                 email, 
                 senha 
@@ -16,7 +16,7 @@ const UserController = {
 
             return res.status(200).json({
                 msg: "Usuario criado com sucesso!",
-                user: userCriado,
+                user2: user2Criado,
             });
         } catch (error) {
             console.error("Erro ao criar usuário:", error);
@@ -29,21 +29,21 @@ const UserController = {
             const { email, senha } = req.body;
 
             // Buscar usuário
-            const user = await User.findOne({ where: { email } });
+            const user2 = await User2.findOne({ where: { email } });
 
-            if (!user) {
+            if (!user2) {
                 console.log("Usuário não encontrado");
                 return res.status(401).json({ msg: "Usuário não encontrado. Por favor, verifique seu email e senha." });
             }
 
             // Comparar senha
-            if (user.senha !== senha) {
+            if (user2.senha !== senha) {
                 console.log("Senha incorreta");
                 return res.status(401).json({ msg: "Senha incorreta. Por favor, verifique sua senha." });
             }
 
             // Gerar token
-            const token = jwt.sign({ email: user.email, nome: user.nome }, process.env.SECRET, { expiresIn: "1h" });
+            const token = jwt.sign({ email: user2.email, nome: user2.nome }, process.env.SECRET, { expiresIn: "1h" });
 
             console.log("Token gerado:", token);
 
@@ -62,15 +62,15 @@ const UserController = {
             console.log({ id });
             console.log({ nome, senha, email });
 
-            const userUpdate = await User.findByPk(id);
+            const user2Update = await User2.findByPk(id);
 
-            if (userUpdate == null) {
+            if (user2Update == null) {
                 return res.status(404).json({
                     msg: "usuario nao encontrado",
                 });
             }
 
-            const updated = await userUpdate.update({
+            const updated = await user2Update.update({
                 nome,
                 senha,
                 email,
@@ -91,7 +91,7 @@ const UserController = {
 
     getAll: async (req, res) => {
         try {
-            const usuarios = await User.findAll();
+            const usuarios = await User2.findAll();
             return res.status(200).json({
                 msg: "Usuarios Encontrados!",
                 usuarios,
@@ -106,7 +106,7 @@ const UserController = {
         try {
             const { id } = req.params;
 
-            const usuarioEncontrado = await User.findByPk(id);
+            const usuarioEncontrado = await User2.findByPk(id);
 
             if (usuarioEncontrado == null) {
                 return res.status(404).json({
@@ -127,14 +127,14 @@ const UserController = {
         try {
             const { id } = req.params;
 
-            const userFinded = await User.findByPk(id);
+            const user2Finded = await User2.findByPk(id);
 
-            if (userFinded == null) {
+            if (user2Finded == null) {
                 return res.status(404).json({
                     msg: "Usuario nao encontrado",
                 });
             }
-            await userFinded.destroy();
+            await user2Finded.destroy();
 
             return res.status(200).json({
                 msg: "Usuario deletado com sucesso",
@@ -146,4 +146,4 @@ const UserController = {
     },
 };
 
-module.exports = UserController;
+module.exports = User2Controller;

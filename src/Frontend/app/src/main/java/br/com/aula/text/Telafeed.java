@@ -6,6 +6,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,7 @@ import java.util.List;
 public class Telafeed extends AppCompatActivity {
 
     private Button btnpostagem;
+    private ImageView imageEngrenagem;
     private RecyclerView recyclerView;
     private FeedAdapter feedAdapter;
     private List<Post> postList;
@@ -41,6 +43,7 @@ public class Telafeed extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_telafeed);
 
+        imageEngrenagem = findViewById(R.id.imageEngrenagem);
         btnpostagem = findViewById(R.id.btnpostagem);
         recyclerView = findViewById(R.id.recyclerViewPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -52,6 +55,13 @@ public class Telafeed extends AppCompatActivity {
             Intent intent = new Intent(Telafeed.this, postagem.class);
             startActivity(intent);
             finish();
+        });
+
+        // Configurar clique na engrenagem
+        imageEngrenagem.setOnClickListener(view -> {
+            Intent intent = new Intent(Telafeed.this, Config.class);
+            startActivity(intent);
+            // Não finalizamos esta activity para poder voltar para ela
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -113,21 +123,23 @@ public class Telafeed extends AppCompatActivity {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
+                                int id = jsonObject.getInt("id");
                                 String nomeCriptografado = jsonObject.getString("nome");
                                 String descricaoCriptografada = jsonObject.getString("descricao");
                                 String nota = jsonObject.getString("nota");
-                                String imagem = jsonObject.optString("imagem", null); // Alterado para null como valor padrão
+                                String imagem = jsonObject.optString("imagem", null);
 
                                 String nomeDecifrado = decifrarCesar(nomeCriptografado, SHIFT);
                                 String descricaoDecifrada = decifrarCesar(descricaoCriptografada, SHIFT);
 
+                                Log.d("Telafeed", "ID: " + id);
                                 Log.d("Telafeed", "Nome criptografado: " + nomeCriptografado);
                                 Log.d("Telafeed", "Nome decifrado: " + nomeDecifrado);
                                 Log.d("Telafeed", "Descrição criptografada: " + descricaoCriptografada);
                                 Log.d("Telafeed", "Descrição decifrada: " + descricaoDecifrada);
                                 Log.d("Telafeed", "Imagem: " + imagem);
 
-                                Post novoPost = new Post(nomeDecifrado, descricaoDecifrada, nota, imagem);
+                                Post novoPost = new Post(id, nomeDecifrado, descricaoDecifrada, nota, imagem);
                                 postList.add(novoPost);
                             }
                             runOnUiThread(() -> {
@@ -167,5 +179,23 @@ public class Telafeed extends AppCompatActivity {
             }
         }
         return resultado.toString();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        carregarPosts(); // Recarrega os posts quando a activity voltar ao primeiro plano
+    }
+
+    // Método para atualizar a lista após exclusão
+    public void atualizarListaAposExclusao(int position) {
+        postList.remove(position);
+        feedAdapter.notifyItemRemoved(position);
+        feedAdapter.notifyItemRangeChanged(position, postList.size());
+    }
+
+    // Método para recarregar todos os posts
+    public void recarregarPosts() {
+        carregarPosts();
     }
 }

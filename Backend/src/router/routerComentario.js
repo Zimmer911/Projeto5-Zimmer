@@ -4,6 +4,10 @@ const { validateComentario, validateComentarioId } = require("../middlewares/Val
 
 const router = Router();
 
+router.get('/post/:postId', (req, res) => {
+    ComentarioController.getByPostId(req, res);
+});
+
 router.post('/',validateComentario,(req,res) => {
     ComentarioController.create(req,res)
 });

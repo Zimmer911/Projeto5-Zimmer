@@ -33,7 +33,7 @@ public class TelaCadastro extends AppCompatActivity {
         btnCadastroClube = findViewById(R.id.btnCadastroClube);
 
         btnCadastroClube.setOnClickListener(view -> {
-            Intent intent = new Intent(TelaCadastro.this, CadastroAtleta.class);
+            Intent intent = new Intent(TelaCadastro.this, CadastroClube.class);
             startActivity(intent);
         });
 

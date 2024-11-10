@@ -1,6 +1,7 @@
 package br.com.aula.text;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -69,6 +70,7 @@ public class ComentariosActivity extends AppCompatActivity {
             jsonObject.put("nome", cifraCesar("user", SHIFT)); // Criptografa o nome
             jsonObject.put("descricao", cifraCesar(comentario, SHIFT)); // Criptografa o comentário
             jsonObject.put("nota", 5); // Opcional
+            jsonObject.put("postId", postId); // Adicionando postId
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -110,13 +112,13 @@ public class ComentariosActivity extends AppCompatActivity {
     private void carregarComentarios() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/comentario")
+                .url("https://ludis.onrender.com/api/comentario/post/" + postId) // Atualizando a URL para buscar comentários por postId
                 .get()
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+            public void onFailure(@NonNull Call call, IOException e) {
                 runOnUiThread(() ->
                         Toast.makeText(ComentariosActivity.this,
                                 "Erro ao carregar comentários",
@@ -125,20 +127,21 @@ public class ComentariosActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
+                    Log.d("ComentariosActivity", "Resposta da API: " + responseData);
+
                     try {
-                        JSONObject json = new JSONObject(responseData);
-                        JSONArray comentariosArray = json.getJSONArray("comentarios");
+                        JSONObject jsonResponse = new JSONObject(responseData);
+                        JSONArray comentariosArray = jsonResponse.getJSONArray("comentarios");
 
                         List<Comentario> novosComentarios = new ArrayList<>();
                         for (int i = 0; i < comentariosArray.length(); i++) {
                             JSONObject comentarioJson = comentariosArray.getJSONObject(i);
-                            novosComentarios.add(new Comentario(
-                                    decifrarCesar(comentarioJson.getString("nome"), SHIFT),
-                                    decifrarCesar(comentarioJson.getString("descricao"), SHIFT)
-                            ));
+                            String nome = comentarioJson.getString("nome");
+                            String descricao = comentarioJson.getString("descricao");
+                            novosComentarios.add(new Comentario(nome, descricao));
                         }
 
                         runOnUiThread(() -> {
@@ -149,6 +152,12 @@ public class ComentariosActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    runOnUiThread(() ->
+                            Toast.makeText(ComentariosActivity.this,
+                                    "Erro ao carregar comentários: " + response.message(),
+                                    Toast.LENGTH_SHORT).show()
+                    );
                 }
             }
         });
