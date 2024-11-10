@@ -1,4 +1,4 @@
-const Comentario = require("../models/Comentario");
+const ComentarioController = require("../controller/ComentarioController");
 
 const ComentarioController = {
   create: async (req, res) => {
@@ -42,9 +42,9 @@ const ComentarioController = {
           msg: "Comentario atualizado com sucesso!",
         });
       }
-      return res.status(500).json({
-        msg: "Erro ao atualizar comentario"
-      });
+    return res.status(500).json({
+        msg:"Erro ao atualizar comentario"
+    })
     } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
@@ -52,19 +52,7 @@ const ComentarioController = {
   },
   getAll: async (req, res) => {
     try {
-      const postId = req.query.postId; // Obtém o postId da query string
-      let comentarios;
-
-      if (postId) {
-        // Se postId for fornecido, filtra os comentários
-        comentarios = await Comentario.findAll({
-          where: { postId: postId } // Filtra os comentários pela publicação
-        });
-      } else {
-        // Se não houver postId, retorna todos os comentários
-        comentarios = await Comentario.findAll();
-      }
-
+      const comentarios = await Comentario.findAll();
       return res.status(200).json({
         msg: "Comentarios Encontrados!",
         comentarios,
