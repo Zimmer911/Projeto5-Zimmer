@@ -1,13 +1,12 @@
 const { Router } = require("express");
-const userRoutes = require("./routerUser ");
-const user2Routes = require("./routerUser 2");
+const userRoutes = require("./routerUser"); // Removido espaço extra
+const user2Routes = require("./routerUser2"); // Verifique se não há espaço extra
 const comentarioRoutes = require("./routerComentario");
 const UserController = require("../controller/UserController");
 const authenticateToken = require("../middlewares/authenticateToken");
 
 const uploadRoutes = require('./routerUpload');
 const publicacaoRoutes = require('./routerPublicacao');
-const ComentarioController = require("../controller/ComentarioController");
 
 const router = Router();
 
