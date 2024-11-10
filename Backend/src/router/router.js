@@ -2,6 +2,7 @@ const { Router } = require("express");
 const userRoutes = require("./routerUser");
 const user2Routes = require("./routerUser2");
 const comentarioRoutes = require("./routerComentario");
+const ComentarioController = require('../controller/ComentarioController');
 const UserController = require("../controller/UserController");
 const authenticateToken = require("../middlewares/authenticateToken");
 
