@@ -69,6 +69,7 @@ public class ComentariosActivity extends AppCompatActivity {
             jsonObject.put("nome", cifraCesar("user", SHIFT)); // Criptografa o nome
             jsonObject.put("descricao", cifraCesar(comentario, SHIFT)); // Criptografa o comentário
             jsonObject.put("nota", 5); // Opcional
+            jsonObject.put("postId", postId); // Adicionando postId ao JSON
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -110,7 +111,7 @@ public class ComentariosActivity extends AppCompatActivity {
     private void carregarComentarios() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/comentario")
+                .url("https://ludis.onrender.com/api/comentario/post/" + postId) // Alterando para buscar comentários pelo postId
                 .get()
                 .build();
 
@@ -129,8 +130,7 @@ public class ComentariosActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
                     try {
-                        JSONObject json = new JSONObject(responseData);
-                        JSONArray comentariosArray = json.getJSONArray("comentarios");
+                        JSONArray comentariosArray = new JSONArray(responseData); // Alterado para lidar com a nova resposta
 
                         List<Comentario> novosComentarios = new ArrayList<>();
                         for (int i = 0; i < comentariosArray.length(); i++) {
