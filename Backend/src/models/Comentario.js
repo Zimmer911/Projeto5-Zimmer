@@ -13,14 +13,6 @@ const Comentario = sequelize.define('comentario', {
     nota: {
         type: DataTypes.INTEGER,
         allowNull: false
-    },
-    postId: { // Adicionando postId para associar o comentário ao post
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'publicacao', // Nome da tabela de publicações
-            key: 'id' // Chave primária da tabela de publicações
-        }
     }
 });
 

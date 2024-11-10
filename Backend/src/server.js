@@ -38,11 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
-// Nova rota para obter comentários por postId
-app.get("/api/comentario/post/:postId", (req, res) => {
-  ComentarioController.getAllByPostId(req, res);
-});
-
 app.get("/healthcheck", (req, res) => {
   // 200 significa que está ok o servidor
   return res.status(200).json({
