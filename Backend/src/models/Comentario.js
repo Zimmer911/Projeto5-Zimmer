@@ -13,6 +13,10 @@ const Comentario = sequelize.define('comentario', {
     nota: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    postId: { // Adicionando o postId
+        type: DataTypes.INTEGER,
+        allowNull: false
     }
 });
 
