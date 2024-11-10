@@ -1,4 +1,4 @@
-const ComentarioController = require("../controller/ComentarioController");
+const Comentario = require("../models/Comentario");
 
 const ComentarioController = {
   create: async (req, res) => {
