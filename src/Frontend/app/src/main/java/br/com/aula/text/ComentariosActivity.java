@@ -1,7 +1,6 @@
 package br.com.aula.text;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -109,10 +108,9 @@ public class ComentariosActivity extends AppCompatActivity {
     }
 
     private void carregarComentarios() {
-        int postId = getIntent().getIntExtra("post_id", -1); // Obtém o ID da publicação atual
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/comentario?postId=" + postId) // Adiciona o postId na URL
+                .url("https://ludis.onrender.com/api/comentario")
                 .get()
                 .build();
 
@@ -127,21 +125,20 @@ public class ComentariosActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(@NonNull Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
-                    Log.d("ComentariosActivity", "Resposta da API: " + responseData);
-
                     try {
-                        JSONObject jsonResponse = new JSONObject(responseData);
-                        JSONArray comentariosArray = jsonResponse.getJSONArray("comentarios");
+                        JSONObject json = new JSONObject(responseData);
+                        JSONArray comentariosArray = json.getJSONArray("comentarios");
 
                         List<Comentario> novosComentarios = new ArrayList<>();
                         for (int i = 0; i < comentariosArray.length(); i++) {
                             JSONObject comentarioJson = comentariosArray.getJSONObject(i);
-                            String nome = comentarioJson.getString("nome");
-                            String descricao = comentarioJson.getString("descricao");
-                            novosComentarios.add(new Comentario(nome, descricao));
+                            novosComentarios.add(new Comentario(
+                                    decifrarCesar(comentarioJson.getString("nome"), SHIFT),
+                                    decifrarCesar(comentarioJson.getString("descricao"), SHIFT)
+                            ));
                         }
 
                         runOnUiThread(() -> {
@@ -152,12 +149,6 @@ public class ComentariosActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                } else {
-                    runOnUiThread(() ->
-                            Toast.makeText(ComentariosActivity.this,
-                                    "Erro ao carregar comentários: " + response.message(),
-                                    Toast.LENGTH_SHORT).show()
-                    );
                 }
             }
         });
