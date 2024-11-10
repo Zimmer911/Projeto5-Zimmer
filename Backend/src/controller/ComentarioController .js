@@ -3,35 +3,32 @@ const Comentario = require("../models/Comentario");
 const ComentarioController = {
   create: async (req, res) => {
     try {
-      const { nome, descricao, nota, postId } = req.body; // Incluindo postId
+      const { nome, descricao, nota } = req.body;
 
-      // Verificação de campos obrigatórios
-      if (!nome || !descricao || !nota || !postId) {
-        return res.status(400).json({ msg: "Todos os campos são obrigatórios." });
-      }
+      const comentarioCriado = await Comentario.create({ nome, descricao, nota });
 
-      const comentarioCriado = await Comentario.create({ nome, descricao, nota, postId }); // Adicionando postId na criação
-
-      return res.status(201).json({
-        msg: "Comentário criado com sucesso!",
-        comentario: comentarioCriado, // Corrigido para 'comentario'
+      return res.status(200).json({
+        msg: "Comentario criado com sucesso!",
+        user: comentarioCriado,
       });
     } catch (error) {
-      console.error("Erro ao criar comentário:", error);
+      console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-  
   update: async (req, res) => {
     try {
       const { id } = req.params;
       const { nome, descricao, nota } = req.body;
 
+      console.log({ id });
+      console.log({ nome, descricao, nota });
+
       const comentarioUpdate = await Comentario.findByPk(id);
 
-      if (!comentarioUpdate) {
+      if (comentarioUpdate == null) {
         return res.status(404).json({
-          msg: "Comentário não encontrado",
+          msg: "Comentario nao encontrado",
         });
       }
 
@@ -40,93 +37,72 @@ const ComentarioController = {
         descricao, 
         nota
       });
-      
-      return res.status(200).json({
-        msg: "Comentário atualizado com sucesso!",
-        comentario: updated, // Retorna o comentário atualizado
-      });
+      if (updated) {
+        return res.status(200).json({
+          msg: "Comentario atualizado com sucesso!",
+        });
+      }
+    return res.status(500).json({
+        msg:"Erro ao atualizar comentario"
+    })
     } catch (error) {
-      console.error("Erro ao atualizar comentário:", error);
+      console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-  
   getAll: async (req, res) => {
     try {
       const comentarios = await Comentario.findAll();
       return res.status(200).json({
-        msg: "Comentários encontrados!",
+        msg: "Comentarios Encontrados!",
         comentarios,
       });
     } catch (error) {
-      console.error("Erro ao buscar comentários:", error);
+      console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-  
   getOne: async (req, res) => {
     try {
       const { id } = req.params;
 
       const comentarioEncontrado = await Comentario.findByPk(id);
 
-      if (!comentarioEncontrado) {
+      if (comentarioEncontrado == null) {
         return res.status(404).json({
-          msg: "Comentário não encontrado!",
+          msg: "Comentario nao encontrado!",
         });
       }
       return res.status(200).json({
-        msg: "Comentário encontrado",
-        comentario: comentarioEncontrado, // Corrigido para 'comentario'
+        msg: "Comentario Encontrados",
+        usuario: comentarioEncontrado,
       });
     } catch (error) {
-      console.error("Erro ao buscar comentário:", error);
+      console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-  
   delete: async (req, res) => {
     try {
       const { id } = req.params;
 
       const comentarioFinded = await Comentario.findByPk(id);
 
-      if (!comentarioFinded) {
+      if (comentarioFinded == null) {
         return res.status(404).json({
-          msg: "Comentário não encontrado",
+          msg: "Comentario nao encontrado",
         });
       }
       await comentarioFinded.destroy();
 
       return res.status(200).json({
-        msg: "Comentário deletado com sucesso",
+        msg: "Comentario deletado com sucesso",
       });
     } catch (error) {
-      console.error("Erro ao deletar comentário:", error);
+      console.error(error);
       return res.status(500).json({ msg: "Acione o Suporte" });
     }
   },
-  
-  getByPostId: async (req, res) => { // Nova função para buscar comentários por postId
-    try {
-      const { postId } = req.params; // Captura o postId da URL
-
-      // Verificação de postId
-      if (!postId) {
-        return res.status(400).json({ msg: "O parâmetro postId é obrigatório." });
-      }
-
-      const comentarios = await Comentario.findAll({ where: { postId } });
-
-      return res.status(200).json({
-        msg: "Comentários encontrados para o post!",
-        comentarios,
-      });
-    } catch (error) {
-      console.error("Erro ao buscar comentários por postId:", error);
-      return res.status(500).json({ msg: "Erro ao buscar comentários" });
-    }
-  }
 };
 
 module.exports = ComentarioController;
