@@ -4,24 +4,16 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -35,15 +27,14 @@ public class ComentariosActivity extends AppCompatActivity {
     private RecyclerView recyclerViewComentarios;
     private ComentariosAdapter adapter;
     private List<Comentario> comentarios;
-    private int postId;
-    private static final int SHIFT = 3; // Adicionado para criptografia César
+    private int postId; // ID do post para o qual os comentários estão sendo feitos
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comentarios);
 
-        postId = getIntent().getIntExtra("post_id", -1);
+        postId = getIntent().getIntExtra("post_id", -1); // Recebe o ID do post
 
         editTextComentario = findViewById(R.id.editTextComentario);
         recyclerViewComentarios = findViewById(R.id.recyclerViewComentarios);
@@ -57,71 +48,65 @@ public class ComentariosActivity extends AppCompatActivity {
         Button btnEnviar = findViewById(R.id.btnEnviarComentario);
         btnEnviar.setOnClickListener(v -> enviarComentario());
 
-        carregarComentarios();
+        carregarComentarios(); // Carrega os comentários ao iniciar a activity
     }
 
     private void enviarComentario() {
-        String comentario = editTextComentario.getText().toString();
-        if (comentario.isEmpty()) return;
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("nome", cifraCesar("user", SHIFT)); // Criptografa o nome
-            jsonObject.put("descricao", cifraCesar(comentario, SHIFT)); // Criptografa o comentário
-            jsonObject.put("nota", 5); // Opcional
-        } catch (JSONException e) {
-            e.printStackTrace();
+        String comentario = editTextComentario.getText().toString().trim();
+        if (comentario.isEmpty()) {
+            Toast.makeText(this, "Por favor, escreva um comentário", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(
-                MediaType.parse("application/json"),
-                jsonObject.toString()
-        );
+        // Cria um JSON para enviar o comentário
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("nome", "Usuário"); // Nome fictício, pode ser alterado
+            jsonObject.put("descricao", comentario);
+            jsonObject.put("postId", postId); // ID do post
 
-        Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/comentario")
-                .post(body)
-                .build();
+            // Envia o comentário para o servidor
+            OkHttpClient client = new OkHttpClient();
+            RequestBody body = RequestBody.create(jsonObject.toString(), MediaType.parse("application/json"));
+            Request request = new Request.Builder()
+                    .url("https://ludis.onrender.com/api/comentario")
+                    .post(body)
+                    .build();
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(ComentariosActivity.this,
-                                "Erro ao enviar comentário",
-                                Toast.LENGTH_SHORT).show()
-                );
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    runOnUiThread(() -> {
-                        editTextComentario.setText("");
-                        carregarComentarios();
-                    });
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    runOnUiThread(() -> Toast.makeText(ComentariosActivity.this, "Erro ao enviar comentário", Toast.LENGTH_SHORT).show());
                 }
-            }
-        });
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        runOnUiThread(() -> {
+                            editTextComentario.setText(""); // Limpa o campo de texto
+                            carregarComentarios(); // Recarrega os comentários
+                        });
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(ComentariosActivity.this, "Erro ao enviar comentário", Toast.LENGTH_SHORT).show());
+                    }
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void carregarComentarios() {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url("https://ludis.onrender.com/api/comentario")
+                .url("https://ludis.onrender.com/api/comentario/post/" + postId)
                 .get()
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(ComentariosActivity.this,
-                                "Erro ao carregar comentários",
-                                Toast.LENGTH_SHORT).show()
-                );
+                runOnUiThread(() -> Toast.makeText(ComentariosActivity.this, "Erro ao carregar comentários", Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -129,47 +114,21 @@ public class ComentariosActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
                     try {
-                        JSONObject json = new JSONObject(responseData);
-                        JSONArray comentariosArray = json.getJSONArray("comentarios");
-
-                        List<Comentario> novosComentarios = new ArrayList<>();
-                        for (int i = 0; i < comentariosArray.length(); i++) {
-                            JSONObject comentarioJson = comentariosArray.getJSONObject(i);
-                            novosComentarios.add(new Comentario(
-                                    decifrarCesar(comentarioJson.getString("nome"), SHIFT),
-                                    decifrarCesar(comentarioJson.getString("descricao"), SHIFT)
-                            ));
+                        JSONArray jsonArray = new JSONArray(responseData);
+                        comentarios.clear();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject comentarioJson = jsonArray.getJSONObject(i);
+                            String nome = comentarioJson.getString("nome");
+                            String descricao = comentarioJson.getString("descricao");
+                            comentarios.add(new Comentario(nome, descricao)); // Adiciona o comentário à lista
                         }
 
-                        runOnUiThread(() -> {
-                            comentarios.clear();
-                            comentarios.addAll(novosComentarios);
-                            adapter.notifyDataSetChanged();
-                        });
+                        runOnUiThread(() -> adapter.notifyDataSetChanged()); // Notifica o adapter para atualizar a RecyclerView
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
             }
         });
-    }
-
-    // Método para criptografar usando a cifra de César
-    private String cifraCesar(String texto, int deslocamento) {
-        StringBuilder resultado = new StringBuilder();
-        for (char caractere : texto.toCharArray()) {
-            if (Character.isLetter(caractere)) {
-                int base = Character.isUpperCase(caractere) ? 'A' : 'a';
-                resultado.append((char) (((caractere - base + deslocamento) % 26) + base));
-            } else {
-                resultado.append(caractere);
-            }
-        }
-        return resultado.toString();
-    }
-
-    // Método para descriptografar usando a cifra de César
-    private String decifrarCesar(String textoCifrado, int deslocamento) {
-        return cifraCesar(textoCifrado, 26 - deslocamento);
     }
 }

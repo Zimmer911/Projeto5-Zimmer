@@ -4,10 +4,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
 public class ComentariosAdapter extends RecyclerView.Adapter<ComentariosAdapter.ComentarioViewHolder> {
@@ -20,8 +18,7 @@ public class ComentariosAdapter extends RecyclerView.Adapter<ComentariosAdapter.
     @NonNull
     @Override
     public ComentarioViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_comentario, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comentario, parent, false);
         return new ComentarioViewHolder(view);
     }
 
@@ -37,7 +34,7 @@ public class ComentariosAdapter extends RecyclerView.Adapter<ComentariosAdapter.
         return comentarios.size();
     }
 
-    public class ComentarioViewHolder extends RecyclerView.ViewHolder {
+    public static class ComentarioViewHolder extends RecyclerView.ViewHolder {
         TextView textNome;
         TextView textDescricao;
 
