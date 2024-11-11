@@ -1,5 +1,6 @@
 package br.com.aula.text;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -65,9 +66,13 @@ public class ComentariosActivity extends AppCompatActivity {
         String comentario = editTextComentario.getText().toString();
         if (comentario.isEmpty()) return;
 
+        // Recuperar o nome do usuário armazenado
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String nomeUsuario = prefs.getString("userName", "Usuário Desconhecido"); // Nome padrão caso não esteja armazenado
+
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("nome", cifraCesar("user", SHIFT)); // Criptografa o nome
+            jsonObject.put("nome", nomeUsuario); // Não criptografa o nome do usuário
             jsonObject.put("descricao", cifraCesar(comentario, SHIFT)); // Criptografa o comentário
             jsonObject.put("nota", 5); // Opcional
             jsonObject.put("postId", postId); // Adicionando postId
@@ -139,8 +144,13 @@ public class ComentariosActivity extends AppCompatActivity {
                         List<Comentario> novosComentarios = new ArrayList<>();
                         for (int i = 0; i < comentariosArray.length(); i++) {
                             JSONObject comentarioJson = comentariosArray.getJSONObject(i);
-                            String nome = comentarioJson.getString("nome");
-                            String descricao = comentarioJson.getString("descricao");
+                            String nomeCifrado = comentarioJson.getString("nome");
+                            String descricaoCifrada = comentarioJson.getString("descricao");
+
+                            // Descriptografar o nome e a descrição
+                            String nome = decifrarCesar(nomeCifrado, SHIFT);
+                            String descricao = decifrarCesar(descricaoCifrada, SHIFT);
+
                             novosComentarios.add(new Comentario(nome, descricao));
                         }
 

@@ -107,6 +107,8 @@ public class CadastroClube extends AppCompatActivity {
         return resultado.toString();
     }
 
+
+
     private void cadastrar(String nome, String email, String senha) {
         CustomTrustManager customTrustManager = new CustomTrustManager();
         OkHttpClient client = customTrustManager.getOkHttpClient();
@@ -147,6 +149,7 @@ public class CadastroClube extends AppCompatActivity {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("userId", userId);
                         editor.putBoolean("isClube", true); // Marca explicitamente como clube
+                        editor.putString("userName", nome); // Armazena o nome do usuário
                         editor.apply();
 
                         runOnUiThread(() -> {
@@ -169,6 +172,13 @@ public class CadastroClube extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+
+
+
 
     private void navigateToFeed() {
         Intent intent = new Intent(CadastroClube.this, Telafeed.class);
