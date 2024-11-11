@@ -1,4 +1,3 @@
-// Backend/src/models/Publicacao.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/config");
 
@@ -18,10 +17,6 @@ const Publicacao = sequelize.define('publicacao', {
     imagem: {
         type: DataTypes.STRING,
         allowNull: true
-    },
-    userId: { // Adicionando o campo userId
-        type: DataTypes.INTEGER,
-        allowNull: false
     }
 });
 
