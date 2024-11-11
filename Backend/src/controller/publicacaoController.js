@@ -3,31 +3,33 @@ const fs = require('fs');
 const path = require('path');
 
 const PublicacaoController = {
-  create: async (req, res) => {
-    try {
+create: async (req, res) => {
+  try {
       const { nome, descricao, nota } = req.body;
+      const userId = req.user.id; // Supondo que você tenha um middleware de autenticação que armazena o usuário na requisição
       let imagemPath = null;
 
       if (req.file) {
-        imagemPath = req.file.filename; // Nome do arquivo salvo
+          imagemPath = req.file.filename; // Nome do arquivo salvo
       }
 
       const publicacaoCriada = await Publicacao.create({ 
-        nome, 
-        descricao, 
-        nota,
-        imagem: imagemPath 
+          nome, 
+          descricao, 
+          nota,
+          imagem: imagemPath,
+          userId // Armazenando o ID do usuário que criou a publicação
       });
 
       return res.status(200).json({
-        msg: "Publicação criada com sucesso!",
-        publicacao: publicacaoCriada,
+          msg: "Publicação criada com sucesso!",
+          publicacao: publicacaoCriada,
       });
-    } catch (error) {
+  } catch (error) {
       console.error(error);
       return res.status(500).json({ msg: "Erro ao criar publicação" });
-    }
-  },
+  }
+},
 
   update: async (req, res) => {
     try {
@@ -120,43 +122,44 @@ const PublicacaoController = {
     }
   },
 
-  delete: async (req, res) => {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id; // Supondo que o ID do usuário logado está disponível aqui
+// Backend/src/controller/publicacaoController.js
+delete: async (req, res) => {
+  try {
+      const { id } = req.params;
+      const userId = req.user.id; // ID do usuário que está tentando excluir a publicação
 
-        const publicacaoFinded = await Publicacao.findByPk(id);
+      const publicacaoFinded = await Publicacao.findByPk(id);
 
-        if (!publicacaoFinded) {
-            return res.status(404).json({
-                msg: "Publicação não encontrada",
-            });
-        }
+      if (!publicacaoFinded) {
+          return res.status(404).json({
+              msg: "Publicação não encontrada",
+          });
+      }
 
-        // Verifica se o usuário que está tentando excluir é o autor da publicação
-        if (publicacaoFinded.userId !== userId) { // Supondo que 'userId' é o campo que armazena o ID do autor
-            return res.status(403).json({
-                msg: "Você não tem permissão para excluir esta publicação",
-            });
-        }
+      // Verificar se o usuário é o autor da publicação
+      if (publicacaoFinded.userId !== userId) {
+          return res.status(403).json({
+              msg: "Você não tem permissão para excluir esta publicação",
+          });
+      }
 
-        // Se a publicação tem uma imagem, deletamos o arquivo
-        if (publicacaoFinded.imagem) {
-            const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
-            fs.unlink(imagePath, (err) => {
-                if (err) console.error("Erro ao deletar imagem:", err);
-            });
-        }
+      // Se a publicação tem uma imagem, deletamos o arquivo
+      if (publicacaoFinded.imagem) {
+          const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
+          fs.unlink(imagePath, (err) => {
+              if (err) console.error("Erro ao deletar imagem:", err);
+          });
+      }
 
-        await publicacaoFinded.destroy();
+      await publicacaoFinded.destroy();
 
-        return res.status(200).json({
-            msg: "Publicação deletada com sucesso",
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ msg: "Erro ao deletar publicação" });
-    }
+      return res.status(200).json({
+          msg: "Publicação deletada com sucesso",
+      });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Erro ao deletar publicação" });
+  }
 },
 };
 
