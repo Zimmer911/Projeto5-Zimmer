@@ -122,34 +122,42 @@ const PublicacaoController = {
 
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
+        const { id } = req.params;
+        const userId = req.user.id; // Supondo que o ID do usuário logado está disponível aqui
 
-      const publicacaoFinded = await Publicacao.findByPk(id);
+        const publicacaoFinded = await Publicacao.findByPk(id);
 
-      if (!publicacaoFinded) {
-        return res.status(404).json({
-          msg: "Publicação não encontrada",
+        if (!publicacaoFinded) {
+            return res.status(404).json({
+                msg: "Publicação não encontrada",
+            });
+        }
+
+        // Verifica se o usuário que está tentando excluir é o autor da publicação
+        if (publicacaoFinded.userId !== userId) { // Supondo que 'userId' é o campo que armazena o ID do autor
+            return res.status(403).json({
+                msg: "Você não tem permissão para excluir esta publicação",
+            });
+        }
+
+        // Se a publicação tem uma imagem, deletamos o arquivo
+        if (publicacaoFinded.imagem) {
+            const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
+            fs.unlink(imagePath, (err) => {
+                if (err) console.error("Erro ao deletar imagem:", err);
+            });
+        }
+
+        await publicacaoFinded.destroy();
+
+        return res.status(200).json({
+            msg: "Publicação deletada com sucesso",
         });
-      }
-
-      // Se a publicação tem uma imagem, deletamos o arquivo
-      if (publicacaoFinded.imagem) {
-        const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
-        fs.unlink(imagePath, (err) => {
-          if (err) console.error("Erro ao deletar imagem:", err);
-        });
-      }
-
-      await publicacaoFinded.destroy();
-
-      return res.status(200).json({
-        msg: "Publicação deletada com sucesso",
-      });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Erro ao deletar publicação" });
+        console.error(error);
+        return res.status(500).json({ msg: "Erro ao deletar publicação" });
     }
-  },
+},
 };
 
 module.exports = PublicacaoController;
