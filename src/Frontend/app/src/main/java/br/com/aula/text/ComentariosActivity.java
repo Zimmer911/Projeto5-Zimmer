@@ -144,6 +144,7 @@ public class ComentariosActivity extends AppCompatActivity {
                         List<Comentario> novosComentarios = new ArrayList<>();
                         for (int i = 0; i < comentariosArray.length(); i++) {
                             JSONObject comentarioJson = comentariosArray.getJSONObject(i);
+                            int id = comentarioJson.getInt("id"); // Obtenha o ID do comentário
                             String nomeCifrado = comentarioJson.getString("nome");
                             String descricaoCifrada = comentarioJson.getString("descricao");
 
@@ -151,7 +152,8 @@ public class ComentariosActivity extends AppCompatActivity {
                             String nome = decifrarCesar(nomeCifrado, SHIFT);
                             String descricao = decifrarCesar(descricaoCifrada, SHIFT);
 
-                            novosComentarios.add(new Comentario(nome, descricao));
+                            // Agora crie o objeto Comentario com o ID
+                            novosComentarios.add(new Comentario(id, nome, descricao));
                         }
 
                         runOnUiThread(() -> {
