@@ -17,18 +17,7 @@ const Publicacao = sequelize.define('publicacao', {
     imagem: {
         type: DataTypes.STRING,
         allowNull: true
-    },
-
-    userId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'Users', // ou o nome da tabela de usuários
-            key: 'id'
-        }
     }
-
-    
 });
 
 module.exports = Publicacao;
