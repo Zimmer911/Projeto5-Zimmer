@@ -122,34 +122,34 @@ const PublicacaoController = {
 
   delete: async (req, res) => {
     try {
-      const { id } = req.params;
+        const { id } = req.params;
+        const userId = req.user.id; // Supondo que você tenha um middleware que adiciona o usuário autenticado
 
-      const publicacaoFinded = await Publicacao.findByPk(id);
+        const publicacaoFinded = await Publicacao.findByPk(id);
 
-      if (!publicacaoFinded) {
-        return res.status(404).json({
-          msg: "Publicação não encontrada",
+        if (!publicacaoFinded) {
+            return res.status(404).json({
+                msg: "Publicação não encontrada",
+            });
+        }
+
+        // Verificar se o usuário é o autor da publicação
+        if (publicacaoFinded.userId !== userId) {
+            return res.status(403).json({
+                msg: "Você não tem permissão para excluir esta publicação",
+            });
+        }
+
+        await publicacaoFinded.destroy();
+
+        return res.status(200).json({
+            msg: "Publicação deletada com sucesso",
         });
-      }
-
-      // Se a publicação tem uma imagem, deletamos o arquivo
-      if (publicacaoFinded.imagem) {
-        const imagePath = path.join(__dirname, '..', '..', 'uploads', publicacaoFinded.imagem);
-        fs.unlink(imagePath, (err) => {
-          if (err) console.error("Erro ao deletar imagem:", err);
-        });
-      }
-
-      await publicacaoFinded.destroy();
-
-      return res.status(200).json({
-        msg: "Publicação deletada com sucesso",
-      });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ msg: "Erro ao deletar publicação" });
+        console.error(error);
+        return res.status(500).json({ msg: "Erro ao deletar publicação" });
     }
-  },
+},
 };
 
 module.exports = PublicacaoController;

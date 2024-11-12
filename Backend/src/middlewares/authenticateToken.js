@@ -8,15 +8,15 @@ function authenticateToken(req, res, next) {
     });
   }
 
-  jwt.verify(token, process.env.SECRET, (err, user) => {
+  jwt.verify(token, process.env.SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({
         msg: "Sua sessão expirou, por favor faça login novamente"
       });
     }
 
-    //Armazenar usuario na requisição
-    req.user = user;
+    // Armazenar userId  na requisição
+    req.userId  = decoded.userId ; // Usa userId  do token decodificado
     next();
   });
 }
