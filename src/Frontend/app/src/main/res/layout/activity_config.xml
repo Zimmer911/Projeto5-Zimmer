@@ -6,18 +6,32 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/editTextNewPassword"
+        android:id="@+id/editTextNewName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nova Senha"
+        android:hint="Digite seu nome" />
+
+    <EditText
+        android:id="@+id/editTextCurrentPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Digite seu CPF/CNPJ"
+        android:inputType="textPassword" />
+
+    <EditText
+        android:id="@+id/editTextNewEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Novo e-mail"
         android:inputType="textPassword"
         android:layout_marginBottom="16dp"/>
+
 
     <Button
         android:id="@+id/buttonChangePassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Alterar Senha"
+        android:text="Alterar E-mail"
         android:layout_marginBottom="16dp"/>
 
     <Button

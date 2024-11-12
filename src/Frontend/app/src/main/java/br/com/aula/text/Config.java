@@ -24,13 +24,15 @@ import okhttp3.Response;
 
 public class Config extends AppCompatActivity {
 
-    private EditText editTextNewPassword;
+    private EditText editTextNewEmail;
     private Button buttonChangePassword, buttonDeleteAccount, buttonBack;
     private OkHttpClient client;
     private static final String BASE_URL = "https://ludis.onrender.com/api";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private int userId;
     private boolean isClube;
+    private EditText editTextNewName;
+    private EditText editTextCurrentPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,28 +47,50 @@ public class Config extends AppCompatActivity {
         // Log para debug
         System.out.println("Config iniciada - UserId: " + userId + ", isClube: " + isClube);
 
-        editTextNewPassword = findViewById(R.id.editTextNewPassword);
+        editTextNewEmail = findViewById(R.id.editTextNewEmail);
         buttonChangePassword = findViewById(R.id.buttonChangePassword);
         buttonDeleteAccount = findViewById(R.id.buttonDeleteAccount);
         buttonBack = findViewById(R.id.buttonBack);
+        editTextNewName = findViewById(R.id.editTextNewName);
+        editTextCurrentPassword = findViewById(R.id.editTextCurrentPassword);
 
         client = new OkHttpClient();
 
-        buttonChangePassword.setOnClickListener(v -> changePassword());
+        buttonChangePassword.setOnClickListener(v -> changeEmail());
         buttonDeleteAccount.setOnClickListener(v -> deleteAccount());
         buttonBack.setOnClickListener(v -> finish());
     }
 
-    private void changePassword() {
-        String newPassword = editTextNewPassword.getText().toString();
-        if (newPassword.isEmpty()) {
-            Toast.makeText(this, "Digite a nova senha", Toast.LENGTH_SHORT).show();
+    private void changeEmail() {
+        String newEmail = editTextNewEmail.getText().toString();
+        String nome = editTextNewName.getText().toString();
+        String currentPassword = editTextCurrentPassword.getText().toString(); // Obtenha a senha atual
+
+        if (newEmail.isEmpty()) {
+            Toast.makeText(this, "Digite o novo e-mail", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (nome.isEmpty()) {
+            Toast.makeText(this, "Digite seu nome", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (currentPassword.isEmpty()) {
+            Toast.makeText(this, "Digite sua senha atual", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!isValidEmail(newEmail)) {
+            Toast.makeText(this, "E-mail inválido. Tente novamente.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("senha", newPassword);
+            jsonBody.put("email", newEmail);
+            jsonBody.put("nome", nome);
+            jsonBody.put("senha", currentPassword); // Inclua a senha no JSON
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -79,14 +103,11 @@ public class Config extends AppCompatActivity {
                 .put(body)
                 .build();
 
-        // Log para debug
-        System.out.println("Alterando senha - URL: " + BASE_URL + endpoint + userId);
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 runOnUiThread(() -> Toast.makeText(Config.this,
-                        "Erro na conexão", Toast.LENGTH_SHORT).show());
+                        "Erro na conexão: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -94,16 +115,30 @@ public class Config extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     runOnUiThread(() -> {
                         Toast.makeText(Config.this,
-                                "Senha alterada com sucesso", Toast.LENGTH_SHORT).show();
-                        editTextNewPassword.setText("");
+                                "E-mail alterado com sucesso", Toast.LENGTH_SHORT).show();
+                        editTextNewEmail.setText(""); // Limpa o campo de entrada
+                        editTextNewName.setText(""); // Limpa o campo de nome
+                        editTextCurrentPassword.setText(""); // Limpa o campo de senha
                     });
                 } else {
-                    runOnUiThread(() -> Toast.makeText(Config.this,
-                            "Erro ao alterar senha", Toast.LENGTH_SHORT).show());
+                    String errorResponse = response.body().string(); // Captura a resposta de erro
+                    runOnUiThread(() -> {
+                        Toast.makeText(Config.this,
+                                "Erro ao alterar e-mail: " + errorResponse, Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
         });
     }
+
+
+
+    // Método para validar o e-mail
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+
 
     private void deleteAccount() {
         // Log para debug
