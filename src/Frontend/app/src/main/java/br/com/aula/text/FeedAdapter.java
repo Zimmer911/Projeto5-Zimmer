@@ -3,7 +3,6 @@ package br.com.aula.text;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -82,13 +81,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         }
                     })
                     .into(holder.imageView);
-
-            // Configurar clique na imagem
-            holder.imageView.setOnClickListener(v -> {
-                Intent intent = new Intent(context, FullScreenImageActivity.class);
-                intent.putExtra("imageUrl", imageUrl);
-                context.startActivity(intent);
-            });
         } else {
             Log.d("FeedAdapter", "Nenhuma imagem para carregar, usando imagem padrão");
             holder.imageView.setImageResource(R.drawable.ic_launcher_background);
@@ -100,6 +92,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             context.startActivity(intent);
         });
 
+        // Adicionar listener para o botão excluir
         holder.btnExcluir.setOnClickListener(v -> {
             excluirPost(post.getId(), position);
         });
@@ -110,16 +103,12 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         return posts.size();
     }
 
+    // Método para excluir post
     private void excluirPost(int postId, int position) {
         OkHttpClient client = new OkHttpClient();
-
-        // Adicionando o token de autenticação ao cabeçalho
-        String token = "Bearer " + getToken(); // Supondo que você tenha um método getToken() que retorna o token de autenticação
-
         Request request = new Request.Builder()
                 .url("https://ludis.onrender.com/api/publicacao/" + postId)
                 .delete()
-                .addHeader("Authorization", token) // Adicionando o cabeçalho de autorização
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -138,24 +127,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         posts.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, posts.size());
-                        Toast.makeText(context, "Post excluído com sucesso", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Post excluído com sucesso",
+                                Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    String errorMessage = response.body().string(); // Captura a mensagem de erro do corpo da resposta
                     ((Activity) context).runOnUiThread(() -> {
-                        Toast.makeText(context, "Erro ao excluir post: " + errorMessage,
+                        Toast.makeText(context, "Erro ao excluir post: " + response.message(),
                                 Toast.LENGTH_SHORT).show();
                     });
                 }
             }
         });
-    }
-
-    // Método fictício para obter o token de autenticação
-    private String getToken() {
-        // Aqui você deve implementar a lógica para recuperar o token do usuário autenticado, por exemplo, de SharedPreferences
-        SharedPreferences prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        return prefs.getString("token", ""); // Supondo que você armazene o token com a chave "token"
     }
 
     public class FeedViewHolder extends RecyclerView.ViewHolder {
