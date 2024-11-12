@@ -153,6 +153,7 @@ public class CadastroAtleta extends AppCompatActivity {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("userId", userId);
                         editor.putBoolean("isClube", false); // Marca explicitamente como atleta
+                        editor.putString("userName", nome); // Armazena o nome do usuário
                         editor.apply();
 
                         runOnUiThread(() -> {

@@ -81,6 +81,13 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         }
                     })
                     .into(holder.imageView);
+
+            // Configurar clique na imagem
+            holder.imageView.setOnClickListener(v -> {
+                Intent intent = new Intent(context, FullScreenImageActivity.class);
+                intent.putExtra("imageUrl", imageUrl);
+                context.startActivity(intent);
+            });
         } else {
             Log.d("FeedAdapter", "Nenhuma imagem para carregar, usando imagem padrão");
             holder.imageView.setImageResource(R.drawable.ic_launcher_background);
@@ -92,7 +99,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             context.startActivity(intent);
         });
 
-        // Adicionar listener para o botão excluir
         holder.btnExcluir.setOnClickListener(v -> {
             excluirPost(post.getId(), position);
         });
@@ -103,7 +109,6 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         return posts.size();
     }
 
-    // Método para excluir post
     private void excluirPost(int postId, int position) {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -127,8 +132,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         posts.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, posts.size());
-                        Toast.makeText(context, "Post excluído com sucesso",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Post excluído com sucesso", Toast.LENGTH_SHORT).show();
                     });
                 } else {
                     ((Activity) context).runOnUiThread(() -> {
