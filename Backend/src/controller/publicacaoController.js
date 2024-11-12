@@ -6,6 +6,7 @@ const PublicacaoController = {
   create: async (req, res) => {
     try {
       const { nome, descricao, nota } = req.body;
+      const userId = req.user.id;
       let imagemPath = null;
 
       if (req.file) {
@@ -16,6 +17,7 @@ const PublicacaoController = {
         nome, 
         descricao, 
         nota,
+        userId,
         imagem: imagemPath 
       });
 
@@ -123,6 +125,7 @@ const PublicacaoController = {
   delete: async (req, res) => {
     try {
       const { id } = req.params;
+      const userId = req.user.id;
 
       const publicacaoFinded = await Publicacao.findByPk(id);
 
@@ -131,6 +134,12 @@ const PublicacaoController = {
           msg: "Publicação não encontrada",
         });
       }
+
+      if (publicacaoFinded.userId !== userId) {
+        return res.status(403).json({
+            msg: "Você não tem permissão para excluir este post",
+        });
+    }
 
       // Se a publicação tem uma imagem, deletamos o arquivo
       if (publicacaoFinded.imagem) {

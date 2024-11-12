@@ -17,7 +17,12 @@ const Publicacao = sequelize.define('publicacao', {
     imagem: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     }
+
 });
 
 module.exports = Publicacao;

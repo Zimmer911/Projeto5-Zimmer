@@ -3,6 +3,7 @@ package br.com.aula.text;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -111,9 +112,14 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
     private void excluirPost(int postId, int position) {
         OkHttpClient client = new OkHttpClient();
+
+        // Adicionando o token de autenticação ao cabeçalho
+        String token = "Bearer " + getToken(); // Supondo que você tenha um método getToken() que retorna o token de autenticação
+
         Request request = new Request.Builder()
                 .url("https://ludis.onrender.com/api/publicacao/" + postId)
                 .delete()
+                .addHeader("Authorization", token) // Adicionando o cabeçalho de autorização
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -135,13 +141,21 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
                         Toast.makeText(context, "Post excluído com sucesso", Toast.LENGTH_SHORT).show();
                     });
                 } else {
+                    String errorMessage = response.body().string(); // Captura a mensagem de erro do corpo da resposta
                     ((Activity) context).runOnUiThread(() -> {
-                        Toast.makeText(context, "Erro ao excluir post: " + response.message(),
+                        Toast.makeText(context, "Erro ao excluir post: " + errorMessage,
                                 Toast.LENGTH_SHORT).show();
                     });
                 }
             }
         });
+    }
+
+    // Método fictício para obter o token de autenticação
+    private String getToken() {
+        // Aqui você deve implementar a lógica para recuperar o token do usuário autenticado, por exemplo, de SharedPreferences
+        SharedPreferences prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        return prefs.getString("token", ""); // Supondo que você armazene o token com a chave "token"
     }
 
     public class FeedViewHolder extends RecyclerView.ViewHolder {
