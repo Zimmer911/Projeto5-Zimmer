@@ -3,6 +3,7 @@ package br.com.aula.text;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -109,7 +110,37 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
         return posts.size();
     }
 
+
+
+
     private void excluirPost(int postId, int position) {
+        SharedPreferences prefs = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        String nomeUsuarioCifrado = prefs.getString("userName", ""); // Nome do usuário logado (cifrado)
+
+        if (nomeUsuarioCifrado.isEmpty()) {
+            Toast.makeText(context, "Usuário não autenticado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Descriptografar o nome do usuário
+        String nomeUsuario = decodificarCesar(nomeUsuarioCifrado, 3); // Exemplo com deslocamento 3
+
+        // Obter o nome da postagem (cifrado)
+        String nomePostagemCifrado = posts.get(position).getNome(); // Supondo que está cifrado
+
+        // Logs para depuração
+        Log.d("ExcluirPost", "Nome do usuário (cifrado): " + nomeUsuarioCifrado);
+        Log.d("ExcluirPost", "Nome do usuário (decifrado): " + nomeUsuario);
+        Log.d("ExcluirPost", "Nome da postagem (cifrado): " + nomePostagemCifrado);
+
+        // Comparação entre o nome do usuário decifrado e o nome da postagem cifrado
+        if (!nomeUsuario.equals(nomePostagemCifrado)) {
+            Toast.makeText(context, "Você não tem permissão para excluir esta postagem", Toast.LENGTH_SHORT).show();
+            Log.e("ExcluirPost", "Os nomes não coincidem: " + nomeUsuario + " vs " + nomePostagemCifrado);
+            return;
+        }
+
+        // Configuração da requisição HTTP para exclusão
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url("https://ludis.onrender.com/api/publicacao/" + postId)
@@ -126,7 +157,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     ((Activity) context).runOnUiThread(() -> {
                         posts.remove(position);
@@ -143,6 +174,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             }
         });
     }
+
+
+    // Método para decodificar usando a cifra de César
+    private String decodificarCesar(String texto, int deslocamento) {
+        StringBuilder textoDecodificado = new StringBuilder();
+        for (char caractere : texto.toCharArray()) {
+            textoDecodificado.append((char) (caractere - deslocamento)); // Subtração para reverter
+        }
+        return textoDecodificado.toString();
+    }
+
 
     public class FeedViewHolder extends RecyclerView.ViewHolder {
         TextView textNome;
