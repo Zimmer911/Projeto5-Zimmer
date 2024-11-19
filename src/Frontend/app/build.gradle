@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'br.com.aula.text'
+    namespace 'br.fecap.pi.ludis'
     compileSdk 34
 
     defaultConfig {
-        applicationId "br.com.aula.text"
+        applicationId "br.fecap.pi.ludis"
         minSdk 24
         targetSdk 34
         versionCode 1

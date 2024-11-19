@@ -17,40 +17,40 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".FullScreenImageActivity"
+            android:name="br.fecap.pi.ludis.FullScreenImageActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginClube"
+            android:name="br.fecap.pi.ludis.LoginClube"
             android:exported="false" />
         <activity
-            android:name=".CadastroClube"
+            android:name="br.fecap.pi.ludis.CadastroClube"
             android:exported="false" />
         <activity
-            android:name=".Config"
+            android:name="br.fecap.pi.ludis.Config"
             android:exported="false" />
         <activity
-            android:name=".ComentariosActivity"
+            android:name="br.fecap.pi.ludis.ComentariosActivity"
             android:exported="false" />
         <activity
-            android:name=".Telafeed"
+            android:name="br.fecap.pi.ludis.Telafeed"
             android:exported="true" />
         <activity
-            android:name=".postagem"
+            android:name="br.fecap.pi.ludis.postagem"
             android:exported="true" />
         <activity
-            android:name=".LoginAtleta"
+            android:name="br.fecap.pi.ludis.LoginAtleta"
             android:exported="true" />
         <activity
-            android:name=".CadastroAtleta"
+            android:name="br.fecap.pi.ludis.CadastroAtleta"
             android:exported="true" />
         <activity
-            android:name=".TelaCadastro"
+            android:name="br.fecap.pi.ludis.TelaCadastro"
             android:exported="true" />
         <activity
-            android:name=".TelaLogin"
+            android:name="br.fecap.pi.ludis.TelaLogin"
             android:exported="true" />
         <activity
-            android:name=".Principal"
+            android:name="br.fecap.pi.ludis.Principal"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -59,7 +59,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".FeedSimulator"
+            android:name="br.fecap.pi.ludis.FeedSimulator"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
