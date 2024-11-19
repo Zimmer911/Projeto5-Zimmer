@@ -3,10 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:background="#8C9DCA"
+    android:background="@color/roxoatleta"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CadastroAtleta">
+
+    <ImageView
+        android:id="@+id/imageView11"
+        android:layout_width="223dp"
+        android:layout_height="56dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.478"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.023"
+        app:srcCompat="@drawable/logocerto" />
 
     <ImageView
         android:id="@+id/btnVoltar"
@@ -25,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Crie sua conta, atleta!"
-        android:textColor="#000000"
+        android:textColor="@color/white"
         android:textSize="34sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -62,7 +74,9 @@
             android:id="@+id/textInputEditTextNome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/nome_label" />
+            android:hint="@string/nome_label"
+            android:backgroundTint="@color/black"/>
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView

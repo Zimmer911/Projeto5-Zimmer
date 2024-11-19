@@ -4,20 +4,21 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E8E1FF"
+    android:background="#b6abce"
     android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="#993399"> <!-- Defina uma cor de fundo se desejar -->
+        android:background="#191970">
 
         <Button
             android:id="@+id/btnpostagem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Nova Postagem"
+            android:backgroundTint="@color/black"
             android:layout_centerInParent="true" />
 
         <ImageView
@@ -36,7 +37,6 @@
 
 
     </RelativeLayout>
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPosts"
