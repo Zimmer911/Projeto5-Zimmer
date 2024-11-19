@@ -14,7 +14,7 @@
 
 ## 💬 Descrição do Projeto
 <p align="center">
-    <img src="https://s10.aconvert.com/convert/p3r68-cdx67/at37i-5lhc9.jpg" alt="Ludis" border="0" width="350px" height="275px">
+    <img src="https://ibb.co/wp5ThMD" alt="Ludis" border="0" width="350px" height="275px">
   </p>
   <br>
   <b>Ludis - Conectando Atletas</b> <br>
