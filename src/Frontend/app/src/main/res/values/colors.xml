@@ -2,5 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="roxobotão">#4D5AC8</color>
+    <color name="roxoatleta">#6670CA</color>
+    <color name="fundoclube">#3D3D7C</color>
+    <color name="roxobotão">#653CDB</color>
+    <color name="corcomentario">#281858</color>
+
 </resources>

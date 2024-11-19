@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:backgroundTint="@color/roxoatleta"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
@@ -11,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="#d8bfd8">
 
         <TextView
             android:id="@+id/textComentarioNome"
@@ -30,7 +32,8 @@
             android:id="@+id/btnExcluirComentario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Excluir" />
+            android:text="Excluir"
+            android:backgroundTint="#34006F"/>
 
     </LinearLayout>
 
